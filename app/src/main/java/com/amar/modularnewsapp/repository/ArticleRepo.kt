@@ -39,8 +39,6 @@ class ArticleRepo {
             }
             return articleRepo
         }
-
-
     }
 
     //    suspend fun getTopHeadLine(token: String, options: Map<String, String>) = articleService.getTopHeadLine(token, options)
