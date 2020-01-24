@@ -76,6 +76,8 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$liveDataKtx_version"
 
+    // ---- Picasso load image
+    implementation "com.squareup.picasso:picasso:$picasso_version"
     // --- add external dependency
     implementation project(":data")
 }

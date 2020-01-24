@@ -95,13 +95,12 @@ private fun customTextFeild(
     editorStyle: TextStyle = BODY1,
     keyboardType: KeyboardType = KeyboardType.Ascii
 ) {
-    Surface(modifier = modifier, color = Color.Gray) {
+    Surface(modifier = modifier, color = (+MaterialTheme.colors()).background) {
         Stack {
             aligned(Alignment.TopLeft) {
                 TextField(
                     value = value,
                     onValueChange = onValueChange,
-
                     textStyle = editorStyle,
                     keyboardType = keyboardType
                 )

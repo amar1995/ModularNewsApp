@@ -3,23 +3,36 @@ package com.amar.modularnewsapp.ui
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.Composable
+import androidx.compose.ambient
 import androidx.compose.state
 import androidx.compose.unaryPlus
+import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.ViewModelProviders
-import androidx.ui.core.Text
-import androidx.ui.core.setContent
+import androidx.ui.core.*
+import androidx.ui.foundation.VerticalScroller
+import androidx.ui.graphics.Canvas
 import androidx.ui.graphics.Color
 import androidx.ui.layout.Column
+import androidx.ui.layout.Container
+import androidx.ui.layout.Expanded
 import androidx.ui.material.Button
 import androidx.ui.material.DrawerState
 import androidx.ui.material.MaterialTheme
+import androidx.ui.material.ModalDrawerLayout
+import androidx.ui.material.surface.Surface
+import androidx.ui.res.imageResource
 import androidx.ui.tooling.preview.Preview
 import com.amar.data.APIClient
 import com.amar.data.DatabaseClient
+import com.amar.data.entities.NewsArticle
 import com.amar.data.service.ArticleService
+import com.amar.modularnewsapp.R
 import com.amar.modularnewsapp.common.BaseViewModelFactory
 import com.amar.modularnewsapp.repository.ArticleRepo
+import com.amar.modularnewsapp.ui.article.ArticleTicket
+import com.amar.modularnewsapp.ui.common.Image
 import com.amar.modularnewsapp.ui.common.TopAppBar
+import com.amar.modularnewsapp.ui.navigationBar.NavigationDrawer
 import com.amar.modularnewsapp.viewmodel.ArticleModel
 
 class MainActivity : AppCompatActivity() {
@@ -45,20 +58,7 @@ class MainActivity : AppCompatActivity() {
         println("Activty A onCreate")
 
         setContent {
-            MaterialTheme {
-                val (drawerState, onStateChange) = +state { DrawerState.Closed }
-                Column() {
-                    TopAppBar(
-                        onDrawerStateChange = onStateChange,
-                        backgroundColor = Color.Gray,
-                        onSearchClick = {}
-                    )
-                    Greeting("Android")
-                    Button(text = "Second", onClick = {
-
-                    })
-                }
-            }
+            MainScreen()
         }
     }
 
@@ -94,14 +94,79 @@ class MainActivity : AppCompatActivity() {
 }
 
 @Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
+fun MainScreen() {
+    MaterialTheme(
+        colors = darkThemeColors,
+        typography = themeTypography
+    ) {
+        val (drawerState, onStateChange) = +state { DrawerState.Closed }
+//        AppContent(onStateChange = onStateChange)
+        ModalDrawerLayout(
+            drawerState = drawerState,
+            onStateChange = onStateChange,
+            gesturesEnabled = false,
+            drawerContent = {
+                NavigationDrawer(
+                    onDrawerStateChange = onStateChange,
+                    backgroundColor = (+MaterialTheme.colors()).surface
+                )
+            },
+            bodyContent = {
+                AppContent(onStateChange = onStateChange)
+            }
+        )
+    }
 }
 
-@Preview
+
 @Composable
-fun DefaultPreview() {
-    MaterialTheme {
-        Greeting("Android")
+fun AppContent(onStateChange: (DrawerState) -> Unit) {
+    println("Main color" + (+MaterialTheme.colors()).background.value)
+    val articleSample = NewsArticle(
+        source = null,
+        author = "The times Of Rock",
+        category = null,
+        title = "Coronavirus Live Updates: Deaths Recorded Hundreds of Miles from Center of Outbreak - The New York Times",
+        urlToImage = "https://static01.nyt.com/images/2020/01/24/world/24china-briefing-1/24china-briefing-1-facebookJumbo.jpg",
+        publishedTime = "Now",
+        content = "sfui sdf l",
+        articleType = "",
+        country = "",
+        description = "",
+        id = 1L,
+        url = ""
+    )
+    val context = +ambient(ContextAmbient)
+    Column() {
+        Surface(color = (+MaterialTheme.colors()).surface) {
+            TopAppBar(
+                onDrawerStateChange = onStateChange,
+                backgroundColor = (+MaterialTheme.colors()).background,
+                onSearchClick = {}
+            )
+        }
+        Surface(color = (+MaterialTheme.colors()).surface, modifier = Expanded) {
+            VerticalScroller() {
+                Column(Expanded) {
+
+                    ArticleTicket(
+                        backgroundColor = (+MaterialTheme.colors()).background,
+                        article = articleSample
+                    )
+                    ArticleTicket(
+                        backgroundColor = (+MaterialTheme.colors()).background,
+                        article = articleSample
+                    )
+                    ArticleTicket(
+                        backgroundColor = (+MaterialTheme.colors()).background,
+                        article = articleSample
+                    )
+                    ArticleTicket(
+                        backgroundColor = (+MaterialTheme.colors()).background,
+                        article = articleSample
+                    )
+                }
+            }
+        }
     }
 }

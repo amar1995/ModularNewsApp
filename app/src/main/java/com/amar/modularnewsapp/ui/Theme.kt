@@ -23,13 +23,13 @@ val lightThemeColors = ColorPalette(
  * using dark colors.
  */
 val darkThemeColors = ColorPalette(
-    primary = Color(0xFFEA6D7E),
-    primaryVariant = Color(0xFFDD0D3E),
+    primary = Color(0xFFFFFF),
+    primaryVariant = Color.Gray,
     onPrimary = Color.Black,
     secondary = Color(0xFF121212),
     onSecondary = Color.White,
-    surface = Color(0xFF121212),
-    background = Color(0xFF121212),
+    surface = Color(0xFF191919),
+    background = Color(0xFF555454),
     onBackground = Color.White,
     onSurface = Color.White
 )
