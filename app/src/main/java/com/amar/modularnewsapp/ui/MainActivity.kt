@@ -9,18 +9,20 @@ import androidx.compose.unaryPlus
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.ViewModelProviders
 import androidx.ui.core.*
+import androidx.ui.foundation.ColoredRect
 import androidx.ui.foundation.VerticalScroller
+import androidx.ui.foundation.selection.MutuallyExclusiveSetItem
+import androidx.ui.foundation.shape.border.Border
+import androidx.ui.foundation.shape.border.DrawBorder
+import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Canvas
 import androidx.ui.graphics.Color
-import androidx.ui.layout.Column
-import androidx.ui.layout.Container
-import androidx.ui.layout.Expanded
-import androidx.ui.material.Button
-import androidx.ui.material.DrawerState
-import androidx.ui.material.MaterialTheme
-import androidx.ui.material.ModalDrawerLayout
+import androidx.ui.layout.*
+import androidx.ui.material.*
 import androidx.ui.material.surface.Surface
 import androidx.ui.res.imageResource
+import androidx.ui.text.TextStyle
+import androidx.ui.text.font.FontWeight
 import androidx.ui.tooling.preview.Preview
 import com.amar.data.APIClient
 import com.amar.data.DatabaseClient
@@ -39,11 +41,13 @@ class MainActivity : AppCompatActivity() {
     val articleRepo: ArticleRepo by lazy {
         ArticleRepo.getInstance(
             DatabaseClient.getInstance(this.applicationContext).articleDao(),
-            APIClient.retrofitServiceProvider<ArticleService>())
+            APIClient.retrofitServiceProvider<ArticleService>()
+        )
     }
 
     val newArticleModel: ArticleModel by lazy {
-        ViewModelProviders.of(this, BaseViewModelFactory { ArticleModel(articleRepo) }).get(ArticleModel::class.java)
+        ViewModelProviders.of(this, BaseViewModelFactory { ArticleModel(articleRepo) })
+            .get(ArticleModel::class.java)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -122,6 +126,27 @@ fun MainScreen() {
 @Composable
 fun AppContent(onStateChange: (DrawerState) -> Unit) {
     println("Main color" + (+MaterialTheme.colors()).background.value)
+
+    val context = +ambient(ContextAmbient)
+    Column() {
+        Surface(color = (+MaterialTheme.colors()).surface) {
+            Column {
+                TopAppBar(
+                    onDrawerStateChange = onStateChange,
+                    backgroundColor = (+MaterialTheme.colors()).background,
+                    onSearchClick = {}
+                )
+                CustomTab()
+            }
+        }
+
+    }
+}
+
+@Composable
+fun CustomTab(
+    modifier: Modifier = Modifier.None
+) {
     val articleSample = NewsArticle(
         source = null,
         author = "The times Of Rock",
@@ -136,37 +161,77 @@ fun AppContent(onStateChange: (DrawerState) -> Unit) {
         id = 1L,
         url = ""
     )
-    val context = +ambient(ContextAmbient)
-    Column() {
-        Surface(color = (+MaterialTheme.colors()).surface) {
-            TopAppBar(
-                onDrawerStateChange = onStateChange,
-                backgroundColor = (+MaterialTheme.colors()).background,
-                onSearchClick = {}
-            )
+    val state = +state { 0 }
+    val titles = listOf("Nation", "International")
+//    TODO
+//    val indicatorContainer = @Composable { tabPositions: List<TabRow.TabPosition> ->
+//        TabRow.IndicatorContainer(tabPositions = tabPositions, selectedIndex = state.value) {
+//            FancyIndicator(Color.White)
+//        }
+//    }
+    FlexColumn(modifier = modifier) {
+        inflexible {
+            TabRow(items = titles, selectedIndex = state.value) { index, text ->
+                FancyTab(
+                    title = text,
+                    onClick = { state.value = index },
+                    selected = (index == state.value)
+                )
+            }
         }
-        Surface(color = (+MaterialTheme.colors()).surface, modifier = Expanded) {
-            VerticalScroller() {
-                Column(Expanded) {
-
-                    ArticleTicket(
-                        backgroundColor = (+MaterialTheme.colors()).background,
-                        article = articleSample
-                    )
-                    ArticleTicket(
-                        backgroundColor = (+MaterialTheme.colors()).background,
-                        article = articleSample
-                    )
-                    ArticleTicket(
-                        backgroundColor = (+MaterialTheme.colors()).background,
-                        article = articleSample
-                    )
-                    ArticleTicket(
-                        backgroundColor = (+MaterialTheme.colors()).background,
-                        article = articleSample
-                    )
+        flexible(flex = 1f) {
+            Surface(color = (+MaterialTheme.colors()).surface, modifier = Expanded) {
+                VerticalScroller() {
+                    Column(Expanded) {
+                        ArticleTicket(
+                            backgroundColor = (+MaterialTheme.colors()).background,
+                            article = articleSample
+                        )
+                        ArticleTicket(
+                            backgroundColor = (+MaterialTheme.colors()).background,
+                            article = articleSample
+                        )
+                        ArticleTicket(
+                            backgroundColor = (+MaterialTheme.colors()).background,
+                            article = articleSample
+                        )
+                        ArticleTicket(
+                            backgroundColor = (+MaterialTheme.colors()).background,
+                            article = articleSample
+                        )
+                    }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun FancyTab(title: String, onClick: () -> Unit, selected: Boolean) {
+    MutuallyExclusiveSetItem(selected = selected, onClick = { onClick() }) {
+        Container(height = 50.dp, padding = EdgeInsets(10.dp)) {
+            Column(
+                ExpandedHeight
+            ) {
+                val color = if (selected) Color.White else Color.Gray
+                Padding(5.dp) {
+                    Text(text = title, style = TextStyle(
+                        color = color,
+                        fontFamily = bodyFontFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 16.sp
+                    ))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FancyIndicator(color: Color) {
+    Padding(5.dp) {
+        Container(expanded = true) {
+            DrawBorder(RoundedCornerShape(5.dp), Border(color, 2.dp))
         }
     }
 }

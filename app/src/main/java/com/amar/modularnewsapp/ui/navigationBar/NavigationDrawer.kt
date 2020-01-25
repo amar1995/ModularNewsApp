@@ -3,10 +3,7 @@ package com.amar.modularnewsapp.ui.navigationBar
 import androidx.annotation.DrawableRes
 import androidx.compose.Composable
 import androidx.compose.unaryPlus
-import androidx.ui.core.Modifier
-import androidx.ui.core.Text
-import androidx.ui.core.WithDensity
-import androidx.ui.core.dp
+import androidx.ui.core.*
 import androidx.ui.foundation.DrawImage
 import androidx.ui.foundation.VerticalScroller
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
@@ -14,13 +11,12 @@ import androidx.ui.graphics.Color
 import androidx.ui.graphics.toArgb
 import androidx.ui.graphics.vector.DrawVector
 import androidx.ui.layout.*
-import androidx.ui.material.Button
-import androidx.ui.material.DrawerState
-import androidx.ui.material.MaterialTheme
-import androidx.ui.material.TextButtonStyle
+import androidx.ui.material.*
 import androidx.ui.material.surface.Surface
 import androidx.ui.res.imageResource
 import androidx.ui.res.vectorResource
+import androidx.ui.text.TextStyle
+import androidx.ui.text.font.FontWeight
 import com.amar.modularnewsapp.R
 
 enum class NewsType {
@@ -33,24 +29,115 @@ enum class NewsType {
     Sports,
     Technology
 }
+private const val POWERED = "Powered By NewsApiOrg"
 
 @Composable
 fun NavigationDrawer(
     onDrawerStateChange: (DrawerState) -> Unit,
     backgroundColor: Color
 ) {
-    Padding(8.dp) {
+
         Column(ExpandedHeight) {
+            Container(height = 150.dp, modifier = ExpandedWidth) {
+                DrawImage(image = +imageResource(R.drawable.news_background))
+            }
             Surface(
                 color = backgroundColor,
-                modifier = Spacing(8.dp)
+                modifier = Flexible(1f) wraps Spacing(8.dp)
             ) {
-                DrawerButton(icon = R.drawable.ic_baseline_business_24, label = "Business", isSelected = false, action = {
-                    onDrawerStateChange(DrawerState.Closed)
-                })
+                VerticalScroller() {
+                    Column {
+                        DrawerButton(
+                            icon = R.drawable.ic_baseline_headline_24,
+                            label = NewsType.TopHeadline.name,
+                            isSelected = false,
+                            action = {
+                                onDrawerStateChange(DrawerState.Closed) }
+                        )
+                        DrawerButton(
+                            icon = R.drawable.ic_baseline_general_24,
+                            label = NewsType.General.name,
+                            isSelected = false,
+                            action = {
+                                onDrawerStateChange(DrawerState.Closed) }
+                        )
+                        Divider(color = Color.Gray)
+                        Text(
+                            text = "Category",
+                            style = TextStyle(
+                                color = Color.White,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.W500
+                            ),
+                            modifier = Spacing(8.dp)
+                        )
+                        DrawerButton(
+                            icon = R.drawable.ic_baseline_business_24,
+                            label = NewsType.Business.name,
+                            isSelected = false,
+                            action = {
+                                onDrawerStateChange(DrawerState.Closed) }
+                        )
+                        DrawerButton(
+                            icon = R.drawable.ic_baseline_sport_24,
+                            label = NewsType.Sports.name,
+                            isSelected = false,
+                            action = {
+                                onDrawerStateChange(DrawerState.Closed) }
+                        )
+                        DrawerButton(
+                            icon = R.drawable.ic_baseline_entertainment_24,
+                            label = NewsType.Entertainment.name,
+                            isSelected = false,
+                            action = {
+                                onDrawerStateChange(DrawerState.Closed) }
+                        )
+                        DrawerButton(
+                            icon = R.drawable.ic_baseline_health_24,
+                            label = NewsType.Health.name,
+                            isSelected = false,
+                            action = {
+                                onDrawerStateChange(DrawerState.Closed) }
+                        )
+
+                        DrawerButton(
+                            icon = R.drawable.ic_baseline_science_24,
+                            label = NewsType.Science.name,
+                            isSelected = false,
+                            action = {
+                                onDrawerStateChange(DrawerState.Closed) }
+                        )
+                        DrawerButton(
+                            icon = R.drawable.ic_baseline_technology_24,
+                            label = NewsType.Technology.name,
+                            isSelected = false,
+                            action = {
+                                onDrawerStateChange(DrawerState.Closed) }
+                        )
+                        Divider(color = Color.Gray)
+
+                        DrawerButton(
+                            icon = R.drawable.ic_baseline_settings_24,
+                            label = "Setting",
+                            isSelected = false,
+                            action = {
+                                onDrawerStateChange(DrawerState.Closed) }
+                        )
+                    }
+                }
+            }
+            Padding(8.dp) {
+                Column {
+                    Divider(color = Color.Gray)
+                    Text(
+                        text = POWERED,
+                        modifier = Gravity.Center wraps Spacing(8.dp)
+                    )
+                    Divider(color = Color.Gray)
+                }
             }
         }
-    }
+
 }
 
 @Composable
