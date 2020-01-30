@@ -28,8 +28,6 @@ data class Source(
         const val time = "time"
         const val content = "content"
         const val category = "category"
-        const val articleType = "article_type"
-        const val country = "country"
     }
     object GsonConst {
         const val sourceId = "id"
@@ -84,11 +82,5 @@ data class NewsArticle(
     val content: String?,
 
     @ColumnInfo(name = Source.Column.category)
-    var category: String?,
-
-    @ColumnInfo(name = Source.Column.articleType)
-    var articleType: String? = "TOP_HEADLINE",
-
-    @ColumnInfo(name = Source.Column.country)
-    var country: String? // can be only all or in
+    var category: String?
 )

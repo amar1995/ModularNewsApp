@@ -7,7 +7,7 @@ data class NewsArticleResponse(
     val status: String = "fail",
 
     @SerializedName("totalResults")
-    val totalResults: Int = 0,
+    val totalResults: Int? = 0,
 
     @SerializedName("articles")
     val article: List<NewsArticle>

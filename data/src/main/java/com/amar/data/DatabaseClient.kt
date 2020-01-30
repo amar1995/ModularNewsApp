@@ -12,6 +12,9 @@ import com.amar.data.common.ConstantConfig.VERSION
 import com.amar.data.common.DateConverter
 import com.amar.data.dao.ArticleDao
 import com.amar.data.entities.NewsArticle
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+
 
 @Database(entities = arrayOf(NewsArticle::class), version = VERSION)
 @TypeConverters(DateConverter::class)
@@ -27,14 +30,18 @@ abstract class DatabaseClient: RoomDatabase() {
             override fun migrate(database: SupportSQLiteDatabase) {
             }
         }
+        private const val NUMBER_OF_THREADS = 4
+        val databaseWriteExecutor: ExecutorService = Executors.newFixedThreadPool(NUMBER_OF_THREADS)
 
         fun getInstance(context: Context): DatabaseClient {
-            if(!::databaseInstance.isInitialized) {
-                databaseInstance = Room.databaseBuilder(
-                    context.applicationContext,
-                    DatabaseClient::class.java,
-                    DATABASE_NAME
-                ).build()
+            synchronized(DatabaseClient::class.java) {
+                if (!::databaseInstance.isInitialized) {
+                    databaseInstance = Room.databaseBuilder(
+                        context.applicationContext,
+                        DatabaseClient::class.java,
+                        DATABASE_NAME
+                    ).build()
+                }
             }
             return databaseInstance
         }
