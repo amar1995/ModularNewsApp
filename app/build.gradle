@@ -75,6 +75,8 @@ dependencies {
     // ---- Lifecylce
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$liveDataKtx_version"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$ktx_viewmodel_version"
+
 
     // ---- Picasso load image
     implementation "com.squareup.picasso:picasso:$picasso_version"

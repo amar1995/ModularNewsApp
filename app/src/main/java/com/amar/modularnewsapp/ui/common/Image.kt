@@ -21,12 +21,28 @@ import com.amar.modularnewsapp.R
 import com.squareup.picasso.NetworkPolicy
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
+import okhttp3.Interceptor
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLSocketFactory
 
 @Composable
 fun Image(url: String, width: Dp, height: Dp) {
     var image by +state<Image?> { null }
     // Later when we get full implementation
     var drawable by +state<Drawable?> { null }
+//    val sslContext: SSLContext = SSLContext.getInstance("TLS");
+//    sslContext.init(null, trustAllCerts, java.security.SecureRandom ());
+//    val sslSocketFactory: SSLSocketFactory = sslContext.getSocketFactory();
+//    val client = OkHttpClient.Builder()
+//        .sslSocketFactory(sslSocketFactory).addInterceptor(Interceptor() {
+//            override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
+//                val original: Request = chain.request();
+//                val authorized: Request = original.newBuilder().build();
+//                return chain.proceed(authorized);
+//            }
+//        }).build();
     +onCommit(url) {
         val picasso = Picasso.get()
         val target = object : Target {
@@ -36,6 +52,7 @@ fun Image(url: String, width: Dp, height: Dp) {
             }
 
             override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
+                println("Exception $e")
                 image = AndroidImage(errorDrawable!!.toBitmap(100, 100))
             }
 
@@ -47,7 +64,6 @@ fun Image(url: String, width: Dp, height: Dp) {
             .load(url)
             .placeholder(R.drawable.progress_loading)
             .error(R.drawable.not_available)
-            .networkPolicy(NetworkPolicy.OFFLINE)
             .into(target)
 
         onDispose {

@@ -157,8 +157,6 @@ private fun DrawerButton(
     } else {
         (+MaterialTheme.colors()).surface
     }
-    println(backgroundColor)
-    println(textIconColor)
     Surface(
         modifier = Modifier.None wraps Spacing(left = 8.dp, top = 8.dp, right = 8.dp),
         color = backgroundColor,

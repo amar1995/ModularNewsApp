@@ -2,14 +2,18 @@ package com.amar.modularnewsapp.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.Composable
-import androidx.compose.ambient
-import androidx.compose.state
-import androidx.compose.unaryPlus
+import androidx.compose.*
+import androidx.compose.frames.commit
+import androidx.compose.frames.inFrame
+import androidx.compose.frames.open
 import androidx.core.graphics.drawable.toBitmap
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.viewModelScope
 import androidx.ui.core.*
 import androidx.ui.foundation.ColoredRect
+import androidx.ui.foundation.ScrollerPosition
 import androidx.ui.foundation.VerticalScroller
 import androidx.ui.foundation.selection.MutuallyExclusiveSetItem
 import androidx.ui.foundation.shape.border.Border
@@ -30,6 +34,7 @@ import com.amar.data.entities.NewsArticle
 import com.amar.data.service.ArticleService
 import com.amar.modularnewsapp.R
 import com.amar.modularnewsapp.common.BaseViewModelFactory
+import com.amar.modularnewsapp.common.ViewState
 import com.amar.modularnewsapp.repository.ArticleRepo
 import com.amar.modularnewsapp.ui.article.ArticleTicket
 import com.amar.modularnewsapp.ui.common.Image
@@ -37,32 +42,21 @@ import com.amar.modularnewsapp.ui.common.TopAppBar
 import com.amar.modularnewsapp.ui.navigationBar.NavigationDrawer
 import com.amar.modularnewsapp.viewmodel.ArticleModel
 
-class MainActivity : AppCompatActivity() {
-    val articleRepo: ArticleRepo by lazy {
-        ArticleRepo.getInstance(
-            DatabaseClient.getInstance(this.applicationContext).articleDao(),
-            APIClient.retrofitServiceProvider<ArticleService>()
-        )
-    }
+private lateinit var newArticleModel: ArticleModel
+val ScrollerPosition.isAtEndOfList: Boolean get() = value >= maxPosition
 
-    val newArticleModel: ArticleModel by lazy {
-        ViewModelProviders.of(this, BaseViewModelFactory { ArticleModel(articleRepo) })
-            .get(ArticleModel::class.java)
-    }
+class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        newArticleModel.content().observe(this, Observer  { state ->
-//            when(state) {
-//                is ViewState.Success<*> -> { println("Data: " + state.data) }
-//                is ViewState.Loading -> { println("Loading") }
-//                is ViewState.Error -> { println( "Error: " + state.reason )}
-//            }
-//        })
+
+        newArticleModel =
+            ViewModelProviders.of(this, BaseViewModelFactory { ArticleModel(application = this.application) })
+                .get(ArticleModel::class.java)
         println("Activty A onCreate")
 
         setContent {
-            MainScreen()
+            MainScreen(this)
         }
     }
 
@@ -98,13 +92,12 @@ class MainActivity : AppCompatActivity() {
 }
 
 @Composable
-fun MainScreen() {
+fun MainScreen(activity: AppCompatActivity) {
     MaterialTheme(
         colors = darkThemeColors,
         typography = themeTypography
     ) {
         val (drawerState, onStateChange) = +state { DrawerState.Closed }
-//        AppContent(onStateChange = onStateChange)
         ModalDrawerLayout(
             drawerState = drawerState,
             onStateChange = onStateChange,
@@ -116,7 +109,7 @@ fun MainScreen() {
                 )
             },
             bodyContent = {
-                AppContent(onStateChange = onStateChange)
+                AppContent(onStateChange = onStateChange, activty = activity)
             }
         )
     }
@@ -124,8 +117,7 @@ fun MainScreen() {
 
 
 @Composable
-fun AppContent(onStateChange: (DrawerState) -> Unit) {
-    println("Main color" + (+MaterialTheme.colors()).background.value)
+fun AppContent(onStateChange: (DrawerState) -> Unit, activty: AppCompatActivity) {
 
     val context = +ambient(ContextAmbient)
     Column() {
@@ -145,93 +137,89 @@ fun AppContent(onStateChange: (DrawerState) -> Unit) {
 
 @Composable
 fun CustomTab(
-    modifier: Modifier = Modifier.None
 ) {
-    val articleSample = NewsArticle(
-        source = null,
-        author = "The times Of Rock",
-        category = null,
-        title = "Coronavirus Live Updates: Deaths Recorded Hundreds of Miles from Center of Outbreak - The New York Times",
-        urlToImage = "https://static01.nyt.com/images/2020/01/24/world/24china-briefing-1/24china-briefing-1-facebookJumbo.jpg",
-        publishedTime = "Now",
-        content = "sfui sdf l",
-        articleType = "",
-        country = "",
-        description = "",
-        id = 1L,
-        url = ""
-    )
-    val state = +state { 0 }
-    val titles = listOf("Nation", "International")
-//    TODO
-//    val indicatorContainer = @Composable { tabPositions: List<TabRow.TabPosition> ->
-//        TabRow.IndicatorContainer(tabPositions = tabPositions, selectedIndex = state.value) {
-//            FancyIndicator(Color.White)
-//        }
-//    }
-    FlexColumn(modifier = modifier) {
-        inflexible {
-            TabRow(items = titles, selectedIndex = state.value) { index, text ->
-                FancyTab(
-                    title = text,
-                    onClick = { state.value = index },
-                    selected = (index == state.value)
-                )
-            }
-        }
-        flexible(flex = 1f) {
-            Surface(color = (+MaterialTheme.colors()).surface, modifier = Expanded) {
-                VerticalScroller() {
-                    Column(Expanded) {
+    var internationalState = +observer(newArticleModel.internationalHeadline)
+    Surface(color = (+MaterialTheme.colors()).surface, modifier = Expanded) {
+        if (internationalState == null) {
+            ShowLoading()
+        } else if (internationalState.isEmpty()) {
+            NoContentMore()
+        } else {
+            val scrollerPosition: ScrollerPosition = +memo { ScrollerPosition(0f) }
+            println("MainActivity data here : " + internationalState)
+//            Observe {
+//                if (scrollerPosition.isAtEndOfList) {
+//                    newArticleModel.loadMoreData()
+//                }
+//            }
+            VerticalScroller(scrollerPosition = scrollerPosition) {
+                Column(Expanded) {
+                    internationalState!!.forEach {
                         ArticleTicket(
                             backgroundColor = (+MaterialTheme.colors()).background,
-                            article = articleSample
-                        )
-                        ArticleTicket(
-                            backgroundColor = (+MaterialTheme.colors()).background,
-                            article = articleSample
-                        )
-                        ArticleTicket(
-                            backgroundColor = (+MaterialTheme.colors()).background,
-                            article = articleSample
-                        )
-                        ArticleTicket(
-                            backgroundColor = (+MaterialTheme.colors()).background,
-                            article = articleSample
+                            article = it
                         )
                     }
                 }
             }
+
+             // TODO Loading problem to solve
+            // newArticleModel.loadMoreData()
         }
     }
 }
 
 @Composable
-private fun FancyTab(title: String, onClick: () -> Unit, selected: Boolean) {
-    MutuallyExclusiveSetItem(selected = selected, onClick = { onClick() }) {
-        Container(height = 50.dp, padding = EdgeInsets(10.dp)) {
-            Column(
-                ExpandedHeight
-            ) {
-                val color = if (selected) Color.White else Color.Gray
-                Padding(5.dp) {
-                    Text(text = title, style = TextStyle(
-                        color = color,
-                        fontFamily = bodyFontFamily,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 16.sp
-                    ))
-                }
+private fun ShowArticle(
+    articleList: List<NewsArticle>,
+    scrollerPosition: ScrollerPosition
+) {
+    VerticalScroller(scrollerPosition = scrollerPosition) {
+        Column(Expanded) {
+            articleList.forEach {
+                ArticleTicket(
+                    backgroundColor = (+MaterialTheme.colors()).background,
+                    article = it
+                )
             }
         }
     }
 }
 
 @Composable
-private fun FancyIndicator(color: Color) {
-    Padding(5.dp) {
-        Container(expanded = true) {
-            DrawBorder(RoundedCornerShape(5.dp), Border(color, 2.dp))
-        }
+private fun NoContentMore(modifier: Modifier = Modifier.None) {
+    Container(modifier = modifier) {
+        Text("No more to show....")
     }
+}
+
+@Composable
+private fun ShowLoading(
+    color: Color = (+MaterialTheme.colors()).primary,
+    modifier: Modifier = Modifier.None
+) {
+    Container(alignment = Alignment.Center, modifier = modifier) {
+        Text("Loading ..... ")
+    }
+}
+
+@Composable
+private fun ShowError() {
+    Container(alignment = Alignment.Center) {
+        Text(
+            "Something went wrong. Please check your internet connection",
+            style = TextStyle(Color.Red)
+        )
+    }
+}
+
+fun <T> observer(data: LiveData<T>) = effectOf<T?> {
+    var result = +state<T?> { data.value }
+    val observer = +memo { Observer<T> { result.value = it } }
+
+    +onCommit(data) {
+        data.observeForever(observer)
+        onDispose { data.removeObserver(observer) }
+    }
+    result.value
 }
