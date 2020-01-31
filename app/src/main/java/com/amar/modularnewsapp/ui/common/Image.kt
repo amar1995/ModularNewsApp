@@ -6,32 +6,23 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.*
 import androidx.core.graphics.drawable.toBitmap
-import androidx.ui.core.ContextAmbient
-import androidx.ui.core.Dp
 import androidx.ui.core.Draw
-import androidx.ui.core.dp
 import androidx.ui.foundation.DrawImage
 import androidx.ui.graphics.Image
 import androidx.ui.graphics.ImageConfig
 import androidx.ui.graphics.NativeImage
 import androidx.ui.graphics.colorspace.ColorSpace
 import androidx.ui.graphics.colorspace.ColorSpaces
-import androidx.ui.layout.Container
+import androidx.ui.unit.Dp
 import com.amar.modularnewsapp.R
-import com.squareup.picasso.NetworkPolicy
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
-import okhttp3.Interceptor
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import javax.net.ssl.SSLContext
-import javax.net.ssl.SSLSocketFactory
 
 @Composable
 fun Image(url: String, width: Dp, height: Dp) {
-    var image by +state<Image?> { null }
+    var image by state<Image?> { null }
     // Later when we get full implementation
-    var drawable by +state<Drawable?> { null }
+    var drawable by state<Drawable?> { null }
 //    val sslContext: SSLContext = SSLContext.getInstance("TLS");
 //    sslContext.init(null, trustAllCerts, java.security.SecureRandom ());
 //    val sslSocketFactory: SSLSocketFactory = sslContext.getSocketFactory();
@@ -43,7 +34,7 @@ fun Image(url: String, width: Dp, height: Dp) {
 //                return chain.proceed(authorized);
 //            }
 //        }).build();
-    +onCommit(url) {
+    onCommit(url) {
         val picasso = Picasso.get()
         val target = object : Target {
             override fun onPrepareLoad(placeHolderDrawable: Drawable?) {

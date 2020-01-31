@@ -17,6 +17,8 @@ import androidx.ui.res.imageResource
 import androidx.ui.res.vectorResource
 import androidx.ui.text.TextStyle
 import androidx.ui.text.font.FontWeight
+import androidx.ui.unit.dp
+import androidx.ui.unit.sp
 import com.amar.modularnewsapp.R
 
 enum class NewsType {
@@ -37,13 +39,13 @@ fun NavigationDrawer(
     backgroundColor: Color
 ) {
 
-        Column(ExpandedHeight) {
-            Container(height = 150.dp, modifier = ExpandedWidth) {
-                DrawImage(image = +imageResource(R.drawable.news_background))
+        Column(LayoutHeight.Fill) {
+            Container(height = 150.dp, modifier = LayoutWidth.Fill) {
+                DrawImage(image = imageResource(R.drawable.news_background))
             }
             Surface(
                 color = backgroundColor,
-                modifier = Flexible(1f) wraps Spacing(8.dp)
+                modifier = LayoutFlexible(1f) + LayoutPadding(8.dp)
             ) {
                 VerticalScroller() {
                     Column {
@@ -69,7 +71,7 @@ fun NavigationDrawer(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.W500
                             ),
-                            modifier = Spacing(8.dp)
+                            modifier = LayoutPadding(8.dp)
                         )
                         DrawerButton(
                             icon = R.drawable.ic_baseline_business_24,
@@ -131,7 +133,7 @@ fun NavigationDrawer(
                     Divider(color = Color.Gray)
                     Text(
                         text = POWERED,
-                        modifier = Gravity.Center wraps Spacing(8.dp)
+                        modifier = LayoutGravity.Center + LayoutPadding(8.dp)
                     )
                     Divider(color = Color.Gray)
                 }
@@ -148,30 +150,30 @@ private fun DrawerButton(
     action: () -> Unit
 ) {
     val textIconColor = if (isSelected) {
-        (+MaterialTheme.colors()).surface
+        (MaterialTheme.colors()).surface
     } else {
-        ((+MaterialTheme.colors()).primary).copy(0.95f)
+        ((MaterialTheme.colors()).primary).copy(0.95f)
     }
     val backgroundColor = if (isSelected) {
-        ((+MaterialTheme.colors()).primary).copy(alpha = 0.80f)
+        ((MaterialTheme.colors()).primary).copy(alpha = 0.80f)
     } else {
-        (+MaterialTheme.colors()).surface
+        (MaterialTheme.colors()).surface
     }
     Surface(
-        modifier = Modifier.None wraps Spacing(left = 8.dp, top = 8.dp, right = 8.dp),
+        modifier = Modifier.None + LayoutPadding(left = 8.dp, top = 8.dp, right = 8.dp),
         color = backgroundColor,
         shape = RoundedCornerShape(4.dp)
     ) {
         Button(onClick = action, style = TextButtonStyle()) {
-            Row(ExpandedWidth) {
+            Row(LayoutWidth.Fill) {
                 VectorImage(
                     id = icon,
                     tint = textIconColor
                 )
-                WidthSpacer(16.dp)
+                Spacer(LayoutWidth(16.dp))
                 Text(
                     text = label,
-                    style = ((+MaterialTheme.typography()).body2).copy(
+                    style = ((MaterialTheme.typography()).body2).copy(
                         color = textIconColor
                     )
                 )
@@ -182,7 +184,7 @@ private fun DrawerButton(
 
 @Composable
 private fun SimpleImage(@DrawableRes id: Int, tint: Color = Color.Transparent) {
-    val image = +imageResource(id)
+    val image = imageResource(id)
     WithDensity {
         Container(
             width = 20.dp,
@@ -193,13 +195,26 @@ private fun SimpleImage(@DrawableRes id: Int, tint: Color = Color.Transparent) {
     }
 }
 
+// --- dev03
+//@Composable
+//private fun VectorImage(@DrawableRes id: Int, tint: Color = Color.Transparent) {
+//    val vector = vectorResource(id)
+//    WithDensity {
+//        Container(
+//            width = vector.defaultWidth.toDp(),
+//            height = vector.defaultHeight.toDp()
+//        ) {
+//            DrawVector(vector, tint)
+//        }
+//    }
+//}
+
 @Composable
-private fun VectorImage(@DrawableRes id: Int, tint: Color = Color.Transparent) {
-    val vector = +vectorResource(id)
+fun VectorImage(modifier: Modifier = Modifier.None, @DrawableRes id: Int, tint: Color = Color.Transparent) {
+    val vector = vectorResource(id)
     WithDensity {
         Container(
-            width = vector.defaultWidth.toDp(),
-            height = vector.defaultHeight.toDp()
+            modifier = modifier + LayoutSize(vector.defaultWidth, vector.defaultHeight)
         ) {
             DrawVector(vector, tint)
         }

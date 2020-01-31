@@ -2,10 +2,8 @@ package com.amar.modularnewsapp.ui.common
 
 import androidx.compose.Composable
 import androidx.compose.state
-import androidx.compose.unaryPlus
 import androidx.ui.core.*
 import androidx.ui.foundation.Clickable
-import androidx.ui.foundation.shape.border.Border
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
 import androidx.ui.graphics.vector.DrawVector
@@ -17,21 +15,23 @@ import androidx.ui.material.MaterialTheme
 import androidx.ui.material.ripple.Ripple
 import androidx.ui.res.vectorResource
 import androidx.ui.text.TextStyle
+import androidx.ui.unit.Dp
+import androidx.ui.unit.dp
 import com.amar.modularnewsapp.R
 
 private const val HINT = "Search News"
-private val BODY1 =(+MaterialTheme.typography()).body1
+@Composable private val BODY1 =(MaterialTheme.typography()).body1
 @Composable
 fun TopAppBar(
     onDrawerStateChange: (DrawerState) -> Unit,
     backgroundColor: Color,
     onSearchClick: () -> Unit
 ) {
-    val value = +state { "" }
+    val value = state { "" }
     Padding(6.dp) {
         Surface(
             color = backgroundColor,
-            modifier = Spacing(8.dp),
+            modifier = LayoutPadding(8.dp),
             shape = RoundedCornerShape(3.dp),
             elevation = 3.dp
         ) {
@@ -41,21 +41,21 @@ fun TopAppBar(
                     onDrawerStateChange = onDrawerStateChange,
                     imageWidth = 30.dp,
                     imageHeight = 40.dp,
-                    modifier = Inflexible wraps Gravity.Center wraps Spacing(left = 6.dp)
+                    modifier = LayoutGravity.Center + LayoutPadding(left = 6.dp)
                 )
                 // text box
                 customTextFeild(
                     hint = HINT,
                     value = value.value,
                     onValueChange = {value.value = it},
-                    modifier = Flexible(1f) wraps Gravity.Center wraps Spacing(left = 8.dp, right = 8.dp)
+                    modifier = LayoutFlexible(1f) + LayoutGravity.Center + LayoutPadding(left = 8.dp, right = 8.dp)
                 )
                 // search bar
                 customVectorImage(
                     onClick = onSearchClick,
                     imageHeight = 30.dp,
                     imageWidth = 20.dp,
-                    modifier = Inflexible wraps Gravity.Center wraps Spacing(right = 6.dp)
+                    modifier = LayoutGravity.Center + LayoutPadding(right = 6.dp)
                 )
             }
         }
@@ -77,7 +77,7 @@ private fun loadToggle(
                 height = imageHeight
             ) {
                 DrawVector(
-                    vectorImage = +vectorResource(R.drawable.ic_baseline_menu_24),
+                    vectorImage = vectorResource(R.drawable.ic_baseline_menu_24),
                     tintColor = color,
                     alignment = Alignment.Center
                 )
@@ -95,9 +95,9 @@ private fun customTextFeild(
     editorStyle: TextStyle = BODY1,
     keyboardType: KeyboardType = KeyboardType.Ascii
 ) {
-    Surface(modifier = modifier, color = (+MaterialTheme.colors()).background) {
+    Surface(modifier = modifier, color = (MaterialTheme.colors()).background) {
         Stack {
-            aligned(Alignment.TopLeft) {
+            Wrap(Alignment.TopLeft) {
                 TextField(
                     value = value,
                     onValueChange = onValueChange,
@@ -106,10 +106,10 @@ private fun customTextFeild(
                 )
             }
             if (value.isBlank()) {
-                aligned(Alignment.TopLeft) {
+                Wrap(Alignment.TopLeft) {
                     Text(
                         hint,
-                        style = (+MaterialTheme.typography()).body1.copy(color = Color.LightGray)
+                        style = (MaterialTheme.typography()).body1.copy(color = Color.LightGray)
                     )
                 }
             }
@@ -133,7 +133,7 @@ private fun customVectorImage(
                 height = imageHeight
             ) {
                 DrawVector(
-                    vectorImage = +vectorResource(R.drawable.ic_baseline_search_24),
+                    vectorImage = vectorResource(R.drawable.ic_baseline_search_24),
                     tintColor = color,
                     alignment = Alignment.Center
                 )

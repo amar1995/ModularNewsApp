@@ -12,17 +12,14 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.viewModelScope
 import androidx.ui.core.*
-import androidx.ui.foundation.ColoredRect
-import androidx.ui.foundation.ScrollerPosition
-import androidx.ui.foundation.VerticalScroller
+import androidx.ui.foundation.*
 import androidx.ui.foundation.selection.MutuallyExclusiveSetItem
-import androidx.ui.foundation.shape.border.Border
-import androidx.ui.foundation.shape.border.DrawBorder
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Canvas
 import androidx.ui.graphics.Color
 import androidx.ui.layout.*
 import androidx.ui.material.*
+import androidx.ui.material.ripple.Ripple
 import androidx.ui.material.surface.Surface
 import androidx.ui.res.imageResource
 import androidx.ui.text.TextStyle
@@ -36,6 +33,7 @@ import com.amar.modularnewsapp.R
 import com.amar.modularnewsapp.common.BaseViewModelFactory
 import com.amar.modularnewsapp.common.ViewState
 import com.amar.modularnewsapp.repository.ArticleRepo
+import com.amar.modularnewsapp.repository.PageSize
 import com.amar.modularnewsapp.ui.article.ArticleTicket
 import com.amar.modularnewsapp.ui.common.Image
 import com.amar.modularnewsapp.ui.common.TopAppBar
@@ -93,11 +91,13 @@ class MainActivity : AppCompatActivity() {
 
 @Composable
 fun MainScreen(activity: AppCompatActivity) {
+    val dark = isSystemInDarkTheme()
     MaterialTheme(
-        colors = darkThemeColors,
+        colors = if(dark) darkThemeColors else lightThemeColors,
         typography = themeTypography
     ) {
-        val (drawerState, onStateChange) = +state { DrawerState.Closed }
+        val (drawerState, onStateChange) = state { DrawerState.Closed }
+
         ModalDrawerLayout(
             drawerState = drawerState,
             onStateChange = onStateChange,
@@ -105,7 +105,7 @@ fun MainScreen(activity: AppCompatActivity) {
             drawerContent = {
                 NavigationDrawer(
                     onDrawerStateChange = onStateChange,
-                    backgroundColor = (+MaterialTheme.colors()).surface
+                    backgroundColor = (MaterialTheme.colors()).surface
                 )
             },
             bodyContent = {
@@ -119,16 +119,42 @@ fun MainScreen(activity: AppCompatActivity) {
 @Composable
 fun AppContent(onStateChange: (DrawerState) -> Unit, activty: AppCompatActivity) {
 
-    val context = +ambient(ContextAmbient)
+    val context = ambient(ContextAmbient)
     Column() {
-        Surface(color = (+MaterialTheme.colors()).surface) {
+        Surface(color = (MaterialTheme.colors()).surface) {
             Column {
                 TopAppBar(
                     onDrawerStateChange = onStateChange,
-                    backgroundColor = (+MaterialTheme.colors()).background,
+                    backgroundColor = (MaterialTheme.colors()).background,
                     onSearchClick = {}
                 )
                 CustomTab()
+//                val articleSample = NewsArticle(
+//                    source = null,
+//                    author = "The times Of Rock",
+//                    category = null,
+//                    title = "Coronavirus Live Updates: Deaths Recorded Hundreds of Miles from Center of Outbreak - The New York Times",
+//                    urlToImage = "https://static01.nyt.com/images/2020/01/24/world/24china-briefing-1/24china-briefing-1-facebookJumbo.jpg",
+//                    publishedTime = "Now",
+//                    content = "sfui sdf l",
+//                    description = "",
+//                    id = 1L,
+//                    url = ""
+//                )
+//                VerticalScroller() {
+//                    Column(modifier = LayoutSize.Fill) {
+//                        Ripple(bounded = true) {
+//                            Clickable() {
+//                                ArticleTicket(
+//                                    backgroundColor = (MaterialTheme.colors()).background,
+//                                    article = articleSample
+//                                )
+//                            }
+//                        }
+//
+//
+//                    }
+//                }
             }
         }
 
@@ -138,53 +164,54 @@ fun AppContent(onStateChange: (DrawerState) -> Unit, activty: AppCompatActivity)
 @Composable
 fun CustomTab(
 ) {
-    var internationalState = +observer(newArticleModel.internationalHeadline)
-    Surface(color = (+MaterialTheme.colors()).surface, modifier = Expanded) {
+
+    var internationalState = observer(newArticleModel.internationalHeadline)
+    Surface(color = (MaterialTheme.colors()).surface, modifier = LayoutSize.Fill) {
         if (internationalState == null) {
             ShowLoading()
         } else if (internationalState.isEmpty()) {
             NoContentMore()
         } else {
-            val scrollerPosition: ScrollerPosition = +memo { ScrollerPosition(0f) }
+            val scrollerPosition: ScrollerPosition = ScrollerPosition(0f)
             println("MainActivity data here : " + internationalState)
 
             Observe {
-                +onCommit(scrollerPosition.isAtEndOfList) {
+                onCommit(scrollerPosition.isAtEndOfList) {
                     println("Is commit entered")
                     if(scrollerPosition.isAtEndOfList)
                         newArticleModel.loadMoreData()
                 }
             }
             VerticalScroller(scrollerPosition = scrollerPosition) {
-                Column(Expanded) {
+                Column(modifier = LayoutSize.Fill) {
+                    println("Page rendering size " + PageSize.topHeadlineInternationalPageNo)
                     internationalState!!.forEach {
-                        ArticleTicket(
-                            backgroundColor = (+MaterialTheme.colors()).background,
-                            article = it
-                        )
+                        Ripple(bounded = true) {
+                            Clickable() {
+                                ArticleTicket(
+                                    backgroundColor = (MaterialTheme.colors()).background,
+                                    article = it
+                                )
+                            }
+                        }
+
                     }
                 }
             }
-
-             // TODO Loading problem to solve
-//            newArticleModel.loadMoreData()
         }
     }
 }
 
 @Composable
 private fun ShowArticle(
-    articleList: List<NewsArticle>,
-    scrollerPosition: ScrollerPosition
+    article: NewsArticle
 ) {
-    VerticalScroller(scrollerPosition = scrollerPosition) {
-        Column(Expanded) {
-            articleList.forEach {
-                ArticleTicket(
-                    backgroundColor = (+MaterialTheme.colors()).background,
-                    article = it
-                )
-            }
+    Ripple(bounded = true) {
+        Clickable() {
+            ArticleTicket(
+                backgroundColor = (MaterialTheme.colors()).background,
+                article = article
+            )
         }
     }
 }
@@ -198,7 +225,7 @@ private fun NoContentMore(modifier: Modifier = Modifier.None) {
 
 @Composable
 private fun ShowLoading(
-    color: Color = (+MaterialTheme.colors()).primary,
+    color: Color = (MaterialTheme.colors()).primary,
     modifier: Modifier = Modifier.None
 ) {
     Container(alignment = Alignment.Center, modifier = modifier) {
@@ -216,13 +243,14 @@ private fun ShowError() {
     }
 }
 
-fun <T> observer(data: LiveData<T>) = effectOf<T?> {
-    var result = +state<T?> { data.value }
-    val observer = +memo { Observer<T> { result.value = it } }
+fun <T> observer(data: LiveData<T>) : T? {
+    var result = state<T?> { data.value }
+    val observer = remember { Observer<T> { result.value = it } }
 
-    +onCommit(data) {
+    onCommit(data) {
         data.observeForever(observer)
         onDispose { data.removeObserver(observer) }
     }
-    result.value
+    return result.value
 }
+

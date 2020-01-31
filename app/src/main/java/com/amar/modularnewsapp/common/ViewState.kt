@@ -1,22 +1,5 @@
 package com.amar.modularnewsapp.common
 
-import androidx.compose.Composable
-import androidx.compose.memo
-import androidx.compose.unaryPlus
-import androidx.ui.core.Alignment
-import androidx.ui.core.Modifier
-import androidx.ui.core.Text
-import androidx.ui.foundation.ScrollerPosition
-import androidx.ui.foundation.VerticalScroller
-import androidx.ui.graphics.Color
-import androidx.ui.layout.Column
-import androidx.ui.layout.Container
-import androidx.ui.layout.Expanded
-import androidx.ui.material.CircularProgressIndicator
-import androidx.ui.material.MaterialTheme
-import androidx.ui.text.TextStyle
-import com.amar.data.entities.NewsArticle
-import com.amar.modularnewsapp.ui.article.ArticleTicket
 
 sealed class ViewState<T> {
 //    @Composable

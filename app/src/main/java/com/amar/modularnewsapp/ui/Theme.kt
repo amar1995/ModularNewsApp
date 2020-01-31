@@ -1,18 +1,19 @@
 package com.amar.modularnewsapp.ui
 
 import androidx.ui.graphics.Color
-import androidx.ui.material.ColorPalette
+import androidx.ui.material.darkColorPalette
+import androidx.ui.material.lightColorPalette
 
 
-val lightThemeColors = ColorPalette(
-    primary = Color(0xFFDD0D3C),
-    primaryVariant = Color(0xFFC20029),
-    onPrimary = Color.White,
-    secondary = Color.White,
-    onSecondary = Color.Black,
-    background = Color.White,
+val lightThemeColors = lightColorPalette(
+    primary = Color(0x00000),
+    primaryVariant = Color.Gray,
+    onPrimary = Color.Black,
+    secondary = Color(0xffffffff),
+    onSecondary = Color.White,
+    surface = Color(0xffffffff),
+    background = Color.LightGray,
     onBackground = Color.Black,
-    surface = Color.White,
     onSurface = Color.Black,
     error = Color(0xFFD00036),
     onError = Color.White
@@ -22,7 +23,7 @@ val lightThemeColors = ColorPalette(
  * Note: Dark Theme support is not yet available, it will come in 2020. This is just an example of
  * using dark colors.
  */
-val darkThemeColors = ColorPalette(
+val darkThemeColors = darkColorPalette(
     primary = Color(0xFFFFFF),
     primaryVariant = Color.Gray,
     onPrimary = Color.Black,
