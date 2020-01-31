@@ -6,8 +6,8 @@ import com.amar.data.dao.ArticleDao
 import com.amar.data.entities.NewsArticle
 import com.amar.data.entities.NewsArticleResponse
 import com.amar.data.service.ArticleService
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import java.lang.Runnable
 
 // ------- This File will interact with separate data module
 
@@ -69,15 +69,21 @@ class ArticleRepo(private val databaseClient: DatabaseClient, private val articl
         options.put(pageSize, "10")
         options.put(page, "2")
         var internationalArticle: NewsArticleResponse? = null
-        withContext(Dispatchers.IO) {
-            internationalArticle = articleService.getTopHeadLine(token, options)
-            println("Load more data server " + internationalArticle)
+        runBlocking {
+           launch(Dispatchers.IO) {
+                internationalArticle = articleService.getTopHeadLine(token, options)
+                println("Server data: " + internationalArticle)
+            }
         }
-        println("Server data entry : " + internationalArticle)
+
+//        withContext(Dispatchers.IO) {
+//            println("Load more data server " + internationalArticle)
+//        }
+        println("Is server data bloacked")
+
         if(internationalArticle != null) {
-
+            println("Server data entry : " + internationalArticle)
             DatabaseClient.databaseWriteExecutor.execute(Runnable {
-
                 val articles = internationalArticle!!.article
                 for(i in 0..articles.size-1) {
                     articles[i].category = "all"

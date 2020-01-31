@@ -147,11 +147,14 @@ fun CustomTab(
         } else {
             val scrollerPosition: ScrollerPosition = +memo { ScrollerPosition(0f) }
             println("MainActivity data here : " + internationalState)
-//            Observe {
-//                if (scrollerPosition.isAtEndOfList) {
-//                    newArticleModel.loadMoreData()
-//                }
-//            }
+
+            Observe {
+                +onCommit(scrollerPosition.isAtEndOfList) {
+                    println("Is commit entered")
+                    if(scrollerPosition.isAtEndOfList)
+                        newArticleModel.loadMoreData()
+                }
+            }
             VerticalScroller(scrollerPosition = scrollerPosition) {
                 Column(Expanded) {
                     internationalState!!.forEach {
@@ -164,7 +167,7 @@ fun CustomTab(
             }
 
              // TODO Loading problem to solve
-            // newArticleModel.loadMoreData()
+//            newArticleModel.loadMoreData()
         }
     }
 }
