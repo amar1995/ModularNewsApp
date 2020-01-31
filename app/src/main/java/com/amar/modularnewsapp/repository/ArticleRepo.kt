@@ -6,8 +6,10 @@ import com.amar.data.dao.ArticleDao
 import com.amar.data.entities.NewsArticle
 import com.amar.data.entities.NewsArticleResponse
 import com.amar.data.service.ArticleService
-import kotlinx.coroutines.*
-import java.lang.Runnable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 // ------- This File will interact with separate data module
 
@@ -30,7 +32,10 @@ object Category {
     var pageNo: Int = 1
 }
 
-class ArticleRepo(private val databaseClient: DatabaseClient, private val articleService: ArticleService) {
+class ArticleRepo(
+    private val databaseClient: DatabaseClient,
+    private val articleService: ArticleService
+) {
 
     private var articleDao: ArticleDao
     // TODO get token from properties file
@@ -39,10 +44,14 @@ class ArticleRepo(private val databaseClient: DatabaseClient, private val articl
     init {
         articleDao = databaseClient.articleDao()
     }
+
     companion object {
         private lateinit var articleRepo: ArticleRepo
-        fun getInstance(databaseClient: DatabaseClient, articleService: ArticleService): ArticleRepo {
-            if(!::articleRepo.isInitialized) {
+        fun getInstance(
+            databaseClient: DatabaseClient,
+            articleService: ArticleService
+        ): ArticleRepo {
+            if (!::articleRepo.isInitialized) {
                 articleRepo = ArticleRepo(databaseClient, articleService)
             }
             return articleRepo
@@ -51,7 +60,7 @@ class ArticleRepo(private val databaseClient: DatabaseClient, private val articl
 
     val internationalHeadline: LiveData<List<NewsArticle>> = articleDao.getArticles()
 
-    fun getCategoryInternationalHeadline(category: String): LiveData<List<NewsArticle>>{
+    fun getCategoryInternationalHeadline(category: String): LiveData<List<NewsArticle>> {
         return articleDao.getCategoryArticles(category)
     }
 
@@ -63,32 +72,27 @@ class ArticleRepo(private val databaseClient: DatabaseClient, private val articl
 
 
     suspend fun loadMoreData(pageNo: Int) {
-        println("Server data " + pageNo)
         val options: HashMap<String, String> = HashMap()
         options.put(language, language_type)
         options.put(pageSize, "10")
-        options.put(page, "2")
+        options.put(page, pageNo.toString())
         var internationalArticle: NewsArticleResponse? = null
         runBlocking {
-           launch(Dispatchers.IO) {
+            launch(Dispatchers.IO) {
                 internationalArticle = articleService.getTopHeadLine(token, options)
-                println("Server data: " + internationalArticle)
             }
         }
-
+//        Not working with compose
 //        withContext(Dispatchers.IO) {
 //            println("Load more data server " + internationalArticle)
 //        }
-        println("Is server data bloacked")
 
-        if(internationalArticle != null) {
-            println("Server data entry : " + internationalArticle)
+        if (internationalArticle != null) {
             DatabaseClient.databaseWriteExecutor.execute(Runnable {
                 val articles = internationalArticle!!.article
-                for(i in 0..articles.size-1) {
+                for (i in 0..articles.size - 1) {
                     articles[i].category = "all"
                 }
-                println("Server data entry : " + internationalArticle)
                 articleDao.insertArticles(internationalArticle!!.article)
             })
         }
@@ -107,11 +111,11 @@ class ArticleRepo(private val databaseClient: DatabaseClient, private val articl
         withContext(Dispatchers.IO) {
             internationalArticle = articleService.getTopHeadLine(token, options)
         }
-        if(internationalArticle != null) {
+        if (internationalArticle != null) {
 
             DatabaseClient.databaseWriteExecutor.execute(Runnable {
                 val articles = internationalArticle!!.article
-                for(i in 0..articles.size-1) {
+                for (i in 0..articles.size - 1) {
                     articles[i].category = "all"
                 }
                 articleDao.insertArticles(articles)

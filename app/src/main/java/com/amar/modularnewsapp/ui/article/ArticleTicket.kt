@@ -1,22 +1,17 @@
 package com.amar.modularnewsapp.ui.article
 
 import androidx.compose.Composable
-import androidx.compose.unaryPlus
 import androidx.ui.core.Clip
 import androidx.ui.core.Text
-import androidx.ui.foundation.DrawImage
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
-import androidx.ui.graphics.imageFromResource
 import androidx.ui.layout.*
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.ProvideEmphasis
 import androidx.ui.material.surface.Surface
-import androidx.ui.res.imageResource
 import androidx.ui.unit.dp
 import com.amar.data.entities.NewsArticle
 import com.amar.modularnewsapp.ui.common.Image
-import com.amar.modularnewsapp.R
 
 @Composable
 fun ArticleTicket(
@@ -34,7 +29,6 @@ fun ArticleTicket(
                 Container(modifier = LayoutWidth.Fill, height = 100.dp) {
                     Clip(shape = RoundedCornerShape(4.dp)) {
                         Image(url = imageUrl, width = 100.dp, height = 100.dp)
-//                        DrawImage(image = +imageResource(R.drawable.progress_loading))
                     }
                 }
             }

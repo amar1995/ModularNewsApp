@@ -18,7 +18,7 @@ import java.util.concurrent.Executors
 
 @Database(entities = arrayOf(NewsArticle::class), version = VERSION)
 @TypeConverters(DateConverter::class)
-abstract class DatabaseClient: RoomDatabase() {
+abstract class DatabaseClient : RoomDatabase() {
 
     abstract fun articleDao(): ArticleDao
 
@@ -26,7 +26,7 @@ abstract class DatabaseClient: RoomDatabase() {
         private lateinit var databaseInstance: DatabaseClient
 
         // Use for migration
-        private val MIGRATION_1_2: Migration = object: Migration(1,2) {
+        private val MIGRATION_1_2: Migration = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
             }
         }

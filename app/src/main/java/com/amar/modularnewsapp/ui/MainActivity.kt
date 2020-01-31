@@ -3,39 +3,31 @@ package com.amar.modularnewsapp.ui
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.*
-import androidx.compose.frames.commit
-import androidx.compose.frames.inFrame
-import androidx.compose.frames.open
-import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.lifecycle.viewModelScope
-import androidx.ui.core.*
-import androidx.ui.foundation.*
-import androidx.ui.foundation.selection.MutuallyExclusiveSetItem
-import androidx.ui.foundation.shape.corner.RoundedCornerShape
-import androidx.ui.graphics.Canvas
+import androidx.ui.core.Alignment
+import androidx.ui.core.Modifier
+import androidx.ui.core.Text
+import androidx.ui.core.setContent
+import androidx.ui.foundation.Clickable
+import androidx.ui.foundation.ScrollerPosition
+import androidx.ui.foundation.VerticalScroller
+import androidx.ui.foundation.isSystemInDarkTheme
 import androidx.ui.graphics.Color
-import androidx.ui.layout.*
-import androidx.ui.material.*
+import androidx.ui.layout.Column
+import androidx.ui.layout.Container
+import androidx.ui.layout.LayoutSize
+import androidx.ui.material.DrawerState
+import androidx.ui.material.MaterialTheme
+import androidx.ui.material.ModalDrawerLayout
 import androidx.ui.material.ripple.Ripple
 import androidx.ui.material.surface.Surface
-import androidx.ui.res.imageResource
 import androidx.ui.text.TextStyle
-import androidx.ui.text.font.FontWeight
-import androidx.ui.tooling.preview.Preview
-import com.amar.data.APIClient
-import com.amar.data.DatabaseClient
 import com.amar.data.entities.NewsArticle
-import com.amar.data.service.ArticleService
-import com.amar.modularnewsapp.R
 import com.amar.modularnewsapp.common.BaseViewModelFactory
-import com.amar.modularnewsapp.common.ViewState
-import com.amar.modularnewsapp.repository.ArticleRepo
 import com.amar.modularnewsapp.repository.PageSize
 import com.amar.modularnewsapp.ui.article.ArticleTicket
-import com.amar.modularnewsapp.ui.common.Image
 import com.amar.modularnewsapp.ui.common.TopAppBar
 import com.amar.modularnewsapp.ui.navigationBar.NavigationDrawer
 import com.amar.modularnewsapp.viewmodel.ArticleModel
@@ -49,7 +41,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         newArticleModel =
-            ViewModelProviders.of(this, BaseViewModelFactory { ArticleModel(application = this.application) })
+            ViewModelProviders.of(
+                this,
+                BaseViewModelFactory { ArticleModel(application = this.application) })
                 .get(ArticleModel::class.java)
         println("Activty A onCreate")
 
@@ -93,7 +87,7 @@ class MainActivity : AppCompatActivity() {
 fun MainScreen(activity: AppCompatActivity) {
     val dark = isSystemInDarkTheme()
     MaterialTheme(
-        colors = if(dark) darkThemeColors else lightThemeColors,
+        colors = if (dark) darkThemeColors else lightThemeColors,
         typography = themeTypography
     ) {
         val (drawerState, onStateChange) = state { DrawerState.Closed }
@@ -118,8 +112,6 @@ fun MainScreen(activity: AppCompatActivity) {
 
 @Composable
 fun AppContent(onStateChange: (DrawerState) -> Unit, activty: AppCompatActivity) {
-
-    val context = ambient(ContextAmbient)
     Column() {
         Surface(color = (MaterialTheme.colors()).surface) {
             Column {
@@ -129,32 +121,6 @@ fun AppContent(onStateChange: (DrawerState) -> Unit, activty: AppCompatActivity)
                     onSearchClick = {}
                 )
                 CustomTab()
-//                val articleSample = NewsArticle(
-//                    source = null,
-//                    author = "The times Of Rock",
-//                    category = null,
-//                    title = "Coronavirus Live Updates: Deaths Recorded Hundreds of Miles from Center of Outbreak - The New York Times",
-//                    urlToImage = "https://static01.nyt.com/images/2020/01/24/world/24china-briefing-1/24china-briefing-1-facebookJumbo.jpg",
-//                    publishedTime = "Now",
-//                    content = "sfui sdf l",
-//                    description = "",
-//                    id = 1L,
-//                    url = ""
-//                )
-//                VerticalScroller() {
-//                    Column(modifier = LayoutSize.Fill) {
-//                        Ripple(bounded = true) {
-//                            Clickable() {
-//                                ArticleTicket(
-//                                    backgroundColor = (MaterialTheme.colors()).background,
-//                                    article = articleSample
-//                                )
-//                            }
-//                        }
-//
-//
-//                    }
-//                }
             }
         }
 
@@ -178,7 +144,7 @@ fun CustomTab(
             Observe {
                 onCommit(scrollerPosition.isAtEndOfList) {
                     println("Is commit entered")
-                    if(scrollerPosition.isAtEndOfList)
+                    if (scrollerPosition.isAtEndOfList)
                         newArticleModel.loadMoreData()
                 }
             }
@@ -186,15 +152,7 @@ fun CustomTab(
                 Column(modifier = LayoutSize.Fill) {
                     println("Page rendering size " + PageSize.topHeadlineInternationalPageNo)
                     internationalState!!.forEach {
-                        Ripple(bounded = true) {
-                            Clickable() {
-                                ArticleTicket(
-                                    backgroundColor = (MaterialTheme.colors()).background,
-                                    article = it
-                                )
-                            }
-                        }
-
+                        ShowArticle(article = it)
                     }
                 }
             }
@@ -204,8 +162,9 @@ fun CustomTab(
 
 @Composable
 private fun ShowArticle(
-    article: NewsArticle
+    @Pivotal article: NewsArticle
 ) {
+    println(article)
     Ripple(bounded = true) {
         Clickable() {
             ArticleTicket(
@@ -243,7 +202,7 @@ private fun ShowError() {
     }
 }
 
-fun <T> observer(data: LiveData<T>) : T? {
+fun <T> observer(data: LiveData<T>): T? {
     var result = state<T?> { data.value }
     val observer = remember { Observer<T> { result.value = it } }
 

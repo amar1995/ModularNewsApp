@@ -29,6 +29,7 @@ data class Source(
         const val content = "content"
         const val category = "category"
     }
+
     object GsonConst {
         const val sourceId = "id"
         const val name = "name"
@@ -43,14 +44,13 @@ data class Source(
 }
 
 
-
 @Entity(tableName = TABLE_NAME)
 data class NewsArticle(
     @Embedded
     val source: Source?,
 
     @ColumnInfo(name = Source.Column.id)
-    @PrimaryKey(autoGenerate =   true)
+    @PrimaryKey(autoGenerate = true)
     val id: Long,
 
     @ColumnInfo(name = Source.Column.author)

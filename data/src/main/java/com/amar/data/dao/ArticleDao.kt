@@ -21,7 +21,6 @@ interface ArticleDao {
     fun getCategoryArticles(category: String): LiveData<List<NewsArticle>>
 
 
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertArticles(article: List<NewsArticle>): List<Long>
 

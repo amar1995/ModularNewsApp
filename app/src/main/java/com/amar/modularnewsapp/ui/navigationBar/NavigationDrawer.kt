@@ -31,6 +31,7 @@ enum class NewsType {
     Sports,
     Technology
 }
+
 private const val POWERED = "Powered By NewsApiOrg"
 
 @Composable
@@ -39,106 +40,115 @@ fun NavigationDrawer(
     backgroundColor: Color
 ) {
 
-        Column(LayoutHeight.Fill) {
-            Container(height = 150.dp, modifier = LayoutWidth.Fill) {
-                DrawImage(image = imageResource(R.drawable.news_background))
-            }
-            Surface(
-                color = backgroundColor,
-                modifier = LayoutFlexible(1f) + LayoutPadding(8.dp)
-            ) {
-                VerticalScroller() {
-                    Column {
-                        DrawerButton(
-                            icon = R.drawable.ic_baseline_headline_24,
-                            label = NewsType.TopHeadline.name,
-                            isSelected = false,
-                            action = {
-                                onDrawerStateChange(DrawerState.Closed) }
-                        )
-                        DrawerButton(
-                            icon = R.drawable.ic_baseline_general_24,
-                            label = NewsType.General.name,
-                            isSelected = false,
-                            action = {
-                                onDrawerStateChange(DrawerState.Closed) }
-                        )
-                        Divider(color = Color.Gray)
-                        Text(
-                            text = "Category",
-                            style = TextStyle(
-                                color = Color.White,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.W500
-                            ),
-                            modifier = LayoutPadding(8.dp)
-                        )
-                        DrawerButton(
-                            icon = R.drawable.ic_baseline_business_24,
-                            label = NewsType.Business.name,
-                            isSelected = false,
-                            action = {
-                                onDrawerStateChange(DrawerState.Closed) }
-                        )
-                        DrawerButton(
-                            icon = R.drawable.ic_baseline_sport_24,
-                            label = NewsType.Sports.name,
-                            isSelected = false,
-                            action = {
-                                onDrawerStateChange(DrawerState.Closed) }
-                        )
-                        DrawerButton(
-                            icon = R.drawable.ic_baseline_entertainment_24,
-                            label = NewsType.Entertainment.name,
-                            isSelected = false,
-                            action = {
-                                onDrawerStateChange(DrawerState.Closed) }
-                        )
-                        DrawerButton(
-                            icon = R.drawable.ic_baseline_health_24,
-                            label = NewsType.Health.name,
-                            isSelected = false,
-                            action = {
-                                onDrawerStateChange(DrawerState.Closed) }
-                        )
-
-                        DrawerButton(
-                            icon = R.drawable.ic_baseline_science_24,
-                            label = NewsType.Science.name,
-                            isSelected = false,
-                            action = {
-                                onDrawerStateChange(DrawerState.Closed) }
-                        )
-                        DrawerButton(
-                            icon = R.drawable.ic_baseline_technology_24,
-                            label = NewsType.Technology.name,
-                            isSelected = false,
-                            action = {
-                                onDrawerStateChange(DrawerState.Closed) }
-                        )
-                        Divider(color = Color.Gray)
-
-                        DrawerButton(
-                            icon = R.drawable.ic_baseline_settings_24,
-                            label = "Setting",
-                            isSelected = false,
-                            action = {
-                                onDrawerStateChange(DrawerState.Closed) }
-                        )
-                    }
-                }
-            }
-            Padding(8.dp) {
+    Column(LayoutHeight.Fill) {
+        Container(height = 150.dp, modifier = LayoutWidth.Fill) {
+            DrawImage(image = imageResource(R.drawable.news_background))
+        }
+        Surface(
+            color = backgroundColor,
+            modifier = LayoutFlexible(1f) + LayoutPadding(8.dp)
+        ) {
+            VerticalScroller() {
                 Column {
-                    Divider(color = Color.Gray)
-                    Text(
-                        text = POWERED,
-                        modifier = LayoutGravity.Center + LayoutPadding(8.dp)
+                    DrawerButton(
+                        icon = R.drawable.ic_baseline_headline_24,
+                        label = NewsType.TopHeadline.name,
+                        isSelected = false,
+                        action = {
+                            onDrawerStateChange(DrawerState.Closed)
+                        }
+                    )
+                    DrawerButton(
+                        icon = R.drawable.ic_baseline_general_24,
+                        label = NewsType.General.name,
+                        isSelected = false,
+                        action = {
+                            onDrawerStateChange(DrawerState.Closed)
+                        }
                     )
                     Divider(color = Color.Gray)
+                    Text(
+                        text = "Category",
+                        style = TextStyle(
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.W500
+                        ),
+                        modifier = LayoutPadding(8.dp)
+                    )
+                    DrawerButton(
+                        icon = R.drawable.ic_baseline_business_24,
+                        label = NewsType.Business.name,
+                        isSelected = false,
+                        action = {
+                            onDrawerStateChange(DrawerState.Closed)
+                        }
+                    )
+                    DrawerButton(
+                        icon = R.drawable.ic_baseline_sport_24,
+                        label = NewsType.Sports.name,
+                        isSelected = false,
+                        action = {
+                            onDrawerStateChange(DrawerState.Closed)
+                        }
+                    )
+                    DrawerButton(
+                        icon = R.drawable.ic_baseline_entertainment_24,
+                        label = NewsType.Entertainment.name,
+                        isSelected = false,
+                        action = {
+                            onDrawerStateChange(DrawerState.Closed)
+                        }
+                    )
+                    DrawerButton(
+                        icon = R.drawable.ic_baseline_health_24,
+                        label = NewsType.Health.name,
+                        isSelected = false,
+                        action = {
+                            onDrawerStateChange(DrawerState.Closed)
+                        }
+                    )
+
+                    DrawerButton(
+                        icon = R.drawable.ic_baseline_science_24,
+                        label = NewsType.Science.name,
+                        isSelected = false,
+                        action = {
+                            onDrawerStateChange(DrawerState.Closed)
+                        }
+                    )
+                    DrawerButton(
+                        icon = R.drawable.ic_baseline_technology_24,
+                        label = NewsType.Technology.name,
+                        isSelected = false,
+                        action = {
+                            onDrawerStateChange(DrawerState.Closed)
+                        }
+                    )
+                    Divider(color = Color.Gray)
+
+                    DrawerButton(
+                        icon = R.drawable.ic_baseline_settings_24,
+                        label = "Setting",
+                        isSelected = false,
+                        action = {
+                            onDrawerStateChange(DrawerState.Closed)
+                        }
+                    )
                 }
             }
         }
+        Padding(8.dp) {
+            Column {
+                Divider(color = Color.Gray)
+                Text(
+                    text = POWERED,
+                    modifier = LayoutGravity.Center + LayoutPadding(8.dp)
+                )
+                Divider(color = Color.Gray)
+            }
+        }
+    }
 
 }
 
@@ -210,7 +220,10 @@ private fun SimpleImage(@DrawableRes id: Int, tint: Color = Color.Transparent) {
 //}
 
 @Composable
-fun VectorImage(modifier: Modifier = Modifier.None, @DrawableRes id: Int, tint: Color = Color.Transparent) {
+fun VectorImage(
+    modifier: Modifier = Modifier.None, @DrawableRes id: Int,
+    tint: Color = Color.Transparent
+) {
     val vector = vectorResource(id)
     WithDensity {
         Container(

@@ -2,17 +2,20 @@ package com.amar.modularnewsapp.ui.common
 
 import androidx.compose.Composable
 import androidx.compose.state
-import androidx.ui.core.*
+import androidx.ui.core.Alignment
+import androidx.ui.core.Modifier
+import androidx.ui.core.Text
+import androidx.ui.core.TextField
 import androidx.ui.foundation.Clickable
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
 import androidx.ui.graphics.vector.DrawVector
 import androidx.ui.input.KeyboardType
 import androidx.ui.layout.*
-import androidx.ui.material.surface.Surface
 import androidx.ui.material.DrawerState
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.ripple.Ripple
+import androidx.ui.material.surface.Surface
 import androidx.ui.res.vectorResource
 import androidx.ui.text.TextStyle
 import androidx.ui.unit.Dp
@@ -20,7 +23,9 @@ import androidx.ui.unit.dp
 import com.amar.modularnewsapp.R
 
 private const val HINT = "Search News"
-@Composable private val BODY1 =(MaterialTheme.typography()).body1
+@Composable
+private val BODY1 = (MaterialTheme.typography()).body1
+
 @Composable
 fun TopAppBar(
     onDrawerStateChange: (DrawerState) -> Unit,
@@ -47,8 +52,11 @@ fun TopAppBar(
                 customTextFeild(
                     hint = HINT,
                     value = value.value,
-                    onValueChange = {value.value = it},
-                    modifier = LayoutFlexible(1f) + LayoutGravity.Center + LayoutPadding(left = 8.dp, right = 8.dp)
+                    onValueChange = { value.value = it },
+                    modifier = LayoutFlexible(1f) + LayoutGravity.Center + LayoutPadding(
+                        left = 8.dp,
+                        right = 8.dp
+                    )
                 )
                 // search bar
                 customVectorImage(
@@ -61,6 +69,7 @@ fun TopAppBar(
         }
     }
 }
+
 @Composable
 private fun loadToggle(
     onDrawerStateChange: (DrawerState) -> Unit,
