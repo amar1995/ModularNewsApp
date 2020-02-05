@@ -26,11 +26,12 @@ import androidx.ui.material.surface.Surface
 import androidx.ui.text.TextStyle
 import com.amar.data.entities.NewsArticle
 import com.amar.modularnewsapp.common.BaseViewModelFactory
-import com.amar.modularnewsapp.repository.PageSize
+import com.amar.data.repository.PageSize
 import com.amar.modularnewsapp.ui.article.ArticleTicket
 import com.amar.modularnewsapp.ui.common.TopAppBar
 import com.amar.modularnewsapp.ui.navigationBar.NavigationDrawer
 import com.amar.modularnewsapp.viewmodel.ArticleModel
+import com.amar.data.vo.Status
 
 private lateinit var newArticleModel: ArticleModel
 val ScrollerPosition.isAtEndOfList: Boolean get() = value >= maxPosition
@@ -131,32 +132,66 @@ fun AppContent(onStateChange: (DrawerState) -> Unit, activty: AppCompatActivity)
 fun CustomTab(
 ) {
 
-    var internationalState = observer(newArticleModel.internationalHeadline)
+    var internationalState = observer(newArticleModel.articleData)
     Surface(color = (MaterialTheme.colors()).surface, modifier = LayoutSize.Fill) {
-        if (internationalState == null) {
+        if(internationalState == null) {
             ShowLoading()
-        } else if (internationalState.isEmpty()) {
-            NoContentMore()
         } else {
-            val scrollerPosition: ScrollerPosition = ScrollerPosition(0f)
-            println("MainActivity data here : " + internationalState)
-
-            Observe {
-                onCommit(scrollerPosition.isAtEndOfList) {
-                    println("Is commit entered")
-                    if (scrollerPosition.isAtEndOfList)
-                        newArticleModel.loadMoreData()
+            when (internationalState!!.status) {
+                Status.LOADING -> {
+                    ShowLoading()
                 }
-            }
-            VerticalScroller(scrollerPosition = scrollerPosition) {
-                Column(modifier = LayoutSize.Fill) {
-                    println("Page rendering size " + PageSize.topHeadlineInternationalPageNo)
-                    internationalState!!.forEach {
-                        ShowArticle(article = it)
+                Status.SUCCESS -> {
+                    val data = internationalState.data
+                    if (data.isNullOrEmpty()) {
+                        NoContentMore()
+                    } else {
+                        val scrollerPosition: ScrollerPosition = ScrollerPosition(0f)
+                        println("MainActivity data here : " + internationalState)
+
+//                    Observe {
+//                        onCommit(scrollerPosition.isAtEndOfList) {
+//                            println("Is commit entered")
+//                            if (scrollerPosition.isAtEndOfList)
+//                                newArticleModel.loadMoreData()
+//                        }
+//                    }
+                        VerticalScroller(scrollerPosition = scrollerPosition) {
+                            Column(modifier = LayoutSize.Fill) {
+                                println("Page rendering size " + PageSize.topHeadlineInternationalPageNo)
+                                data.forEach {
+                                    ShowArticle(article = it)
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
+//        if (internationalState == null) {
+//            ShowLoading()
+//        } else if (internationalState.isEmpty()) {
+//            NoContentMore()
+//        } else {
+//            val scrollerPosition: ScrollerPosition = ScrollerPosition(0f)
+//            println("MainActivity data here : " + internationalState)
+//
+//            Observe {
+//                onCommit(scrollerPosition.isAtEndOfList) {
+//                    println("Is commit entered")
+//                    if (scrollerPosition.isAtEndOfList)
+//                        newArticleModel.loadMoreData()
+//                }
+//            }
+//            VerticalScroller(scrollerPosition = scrollerPosition) {
+//                Column(modifier = LayoutSize.Fill) {
+//                    println("Page rendering size " + PageSize.topHeadlineInternationalPageNo)
+//                    internationalState!!.forEach {
+//                        ShowArticle(article = it)
+//                    }
+//                }
+//            }
+//        }
     }
 }
 

@@ -1,7 +1,9 @@
-package com.amar.modularnewsapp.repository
+package com.amar.data.repository
 
+import androidx.compose.Context
 import androidx.lifecycle.LiveData
 import com.amar.data.DatabaseClient
+import com.amar.data.common.resultLiveData
 import com.amar.data.dao.ArticleDao
 import com.amar.data.entities.NewsArticle
 import com.amar.data.entities.NewsArticleResponse
@@ -34,25 +36,33 @@ object Category {
 
 class ArticleRepo(
     private val databaseClient: DatabaseClient,
-    private val articleService: ArticleService
+    private val articleService: ArticleService,
+    context: Context
 ) {
 
     private var articleDao: ArticleDao
+    private var dataSource: ArticleRemoteDataSource
     // TODO get token from properties file
     private var token: String = "8aefceae6e4e4e2c8ea0364cdf8b5aad"
 
     init {
         articleDao = databaseClient.articleDao()
+        val options: HashMap<String, String> = HashMap()
+        options.put(language, language_type)
+        options.put(pageSize, "10")
+        options.put(page, "1")
+        dataSource = ArticleRemoteDataSource(articleService, options)
     }
 
     companion object {
         private lateinit var articleRepo: ArticleRepo
         fun getInstance(
             databaseClient: DatabaseClient,
-            articleService: ArticleService
+            articleService: ArticleService,
+            context: Context
         ): ArticleRepo {
             if (!::articleRepo.isInitialized) {
-                articleRepo = ArticleRepo(databaseClient, articleService)
+                articleRepo = ArticleRepo(databaseClient, articleService, context)
             }
             return articleRepo
         }
@@ -71,7 +81,7 @@ class ArticleRepo(
 //    *  */
 
 
-    suspend fun loadMoreData(pageNo: Int) {
+     fun loadMoreData(pageNo: Int) {
         val options: HashMap<String, String> = HashMap()
         options.put(language, language_type)
         options.put(pageSize, "10")
@@ -79,7 +89,7 @@ class ArticleRepo(
         var internationalArticle: NewsArticleResponse? = null
         runBlocking {
             launch(Dispatchers.IO) {
-                internationalArticle = articleService.getTopHeadLine(token, options)
+                internationalArticle = articleService.getTopHeadLine(options)
             }
         }
 //        Not working with compose
@@ -109,10 +119,9 @@ class ArticleRepo(
         options.put(page, "1")
         var internationalArticle: NewsArticleResponse? = null
         withContext(Dispatchers.IO) {
-            internationalArticle = articleService.getTopHeadLine(token, options)
+            internationalArticle = articleService.getTopHeadLine(options)
         }
         if (internationalArticle != null) {
-
             DatabaseClient.databaseWriteExecutor.execute(Runnable {
                 val articles = internationalArticle!!.article
                 for (i in 0..articles.size - 1) {
@@ -122,6 +131,14 @@ class ArticleRepo(
             })
         }
     }
+
+    val articleData = resultLiveData<List<NewsArticle>, NewsArticleResponse>(
+        databaseQuery = { articleDao.getArticles() },
+        networkCall = { dataSource.fetchData() },
+        saveCallResult = { articleDao.insertArticles(it.article) },
+        deleteData = { articleDao.deleteArticles() },
+        shouldFetch = true
+    )
 
     /* get everything with query-search and language=en
     *   1. query to top headline(No database require only work with search live-search)

@@ -26,12 +26,12 @@ interface ArticleDao {
 
 
     @Delete
-    fun deleteAllArticle(articles: List<NewsArticle>)
+    suspend fun deleteAllArticle(articles: List<NewsArticle>)
 
     @Query("Delete from $TABLE_NAME where category = \"all\" ")
     fun deleteArticles()
 
     @Query("Delete from $TABLE_NAME where category = :category")
-    fun deleteCategoryArticles(category: String)
+    suspend fun deleteCategoryArticles(category: String)
 
 }

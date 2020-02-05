@@ -8,8 +8,8 @@ import com.amar.data.APIClient
 import com.amar.data.DatabaseClient
 import com.amar.data.entities.NewsArticle
 import com.amar.data.service.ArticleService
-import com.amar.modularnewsapp.repository.ArticleRepo
-import com.amar.modularnewsapp.repository.PageSize
+import com.amar.data.repository.ArticleRepo
+import com.amar.data.repository.PageSize
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -26,11 +26,15 @@ class ArticleModel(application: Application) : AndroidViewModel(application) {
      * way to set this value to observers.
      */
     private var _eventNetworkError = MutableLiveData<Boolean>(false)
-
+//    private var _dataResource = MutableLiveData<Resource<List<NewsArticle>>>()
+//
+//    val data: MutableLiveData<Resource<List<NewsArticle>>>
+//    get() = _dataResource
     /**
      * Event triggered for network error. Views should use this to get access
      * to the data.
      */
+
     val eventNetworkError: LiveData<Boolean>
         get() = _eventNetworkError
 
@@ -50,10 +54,11 @@ class ArticleModel(application: Application) : AndroidViewModel(application) {
     val articleRepo: ArticleRepo by lazy {
         ArticleRepo.getInstance(
             DatabaseClient.getInstance(application),
-            APIClient.retrofitServiceProvider<ArticleService>()
+            APIClient.retrofitServiceProvider<ArticleService>(),
+            application.applicationContext
         )
     }
-
+    val articleData = articleRepo.articleData
     init {
         refreshData()
     }
