@@ -6,10 +6,7 @@ import androidx.compose.*
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.ui.core.Alignment
-import androidx.ui.core.Modifier
-import androidx.ui.core.Text
-import androidx.ui.core.setContent
+import androidx.ui.core.*
 import androidx.ui.foundation.Clickable
 import androidx.ui.foundation.ScrollerPosition
 import androidx.ui.foundation.VerticalScroller
@@ -32,6 +29,7 @@ import com.amar.modularnewsapp.ui.common.TopAppBar
 import com.amar.modularnewsapp.ui.navigationBar.NavigationDrawer
 import com.amar.modularnewsapp.viewmodel.ArticleModel
 import com.amar.data.vo.Status
+import com.amar.modularnewsapp.common.InternetConnection
 
 private lateinit var newArticleModel: ArticleModel
 val ScrollerPosition.isAtEndOfList: Boolean get() = value >= maxPosition
@@ -132,22 +130,20 @@ fun AppContent(onStateChange: (DrawerState) -> Unit, activty: AppCompatActivity)
 fun CustomTab(
 ) {
 
-    var internationalState = observer(newArticleModel.articleData)
+    var internationalState = observer(newArticleModel.articleData2)
+    println(">>>>>> " + internationalState)
     Surface(color = (MaterialTheme.colors()).surface, modifier = LayoutSize.Fill) {
-        if(internationalState == null) {
-            ShowLoading()
-        } else {
-            when (internationalState!!.status) {
-                Status.LOADING -> {
-                    ShowLoading()
-                }
-                Status.SUCCESS -> {
-                    val data = internationalState.data
-                    if (data.isNullOrEmpty()) {
-                        NoContentMore()
-                    } else {
-                        val scrollerPosition: ScrollerPosition = ScrollerPosition(0f)
-                        println("MainActivity data here : " + internationalState)
+        when(internationalState!!.status) {
+            Status.LOADING -> {
+                ShowLoading()
+            }
+            Status.SUCCESS -> {
+                val data = internationalState.data
+                if(data.isNullOrEmpty()) {
+                    NoContentMore()
+                } else {
+                    val scrollerPosition: ScrollerPosition = ScrollerPosition(0f)
+                    println("MainActivity data here : " + internationalState)
 
 //                    Observe {
 //                        onCommit(scrollerPosition.isAtEndOfList) {
@@ -156,18 +152,31 @@ fun CustomTab(
 //                                newArticleModel.loadMoreData()
 //                        }
 //                    }
-                        VerticalScroller(scrollerPosition = scrollerPosition) {
-                            Column(modifier = LayoutSize.Fill) {
-                                println("Page rendering size " + PageSize.topHeadlineInternationalPageNo)
-                                data.forEach {
-                                    ShowArticle(article = it)
-                                }
+                    VerticalScroller(scrollerPosition = scrollerPosition) {
+                        Column(modifier = LayoutSize.Fill) {
+                            println("Page rendering size " + PageSize.topHeadlineInternationalPageNo)
+                            data.forEach {
+                                ShowArticle(article = it)
                             }
                         }
                     }
                 }
             }
+            Status.ERROR -> {
+                val context = ambient(key = ContextAmbient)
+                if(!InternetConnection.isAvailable(context = context)) {
+                    ShowError(msg = "No Internet")
+                } else {
+                    ShowError(msg = if(internationalState.message == null) "Unknow Error!!!" else internationalState.message!!)
+                }
+            }
+            Status.UNAUTHORIZED -> {
+                Container(alignment = Alignment.Center) {
+                    Text("Please Login")
+                }
+            }
         }
+
 //        if (internationalState == null) {
 //            ShowLoading()
 //        } else if (internationalState.isEmpty()) {
@@ -228,10 +237,10 @@ private fun ShowLoading(
 }
 
 @Composable
-private fun ShowError() {
+private fun ShowError(msg: String) {
     Container(alignment = Alignment.Center) {
         Text(
-            "Something went wrong. Please check your internet connection",
+            msg,
             style = TextStyle(Color.Red)
         )
     }

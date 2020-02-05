@@ -3,15 +3,14 @@ package com.amar.data.repository
 import androidx.compose.Context
 import androidx.lifecycle.LiveData
 import com.amar.data.DatabaseClient
-import com.amar.data.common.resultLiveData
+import com.amar.data.common.InternetConnection
+import com.amar.data.common.NetworkManager
 import com.amar.data.dao.ArticleDao
 import com.amar.data.entities.NewsArticle
 import com.amar.data.entities.NewsArticleResponse
+import com.amar.data.service.ApiResponse
 import com.amar.data.service.ArticleService
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import com.amar.data.vo.Resource
 
 // ------- This File will interact with separate data module
 
@@ -37,21 +36,15 @@ object Category {
 class ArticleRepo(
     private val databaseClient: DatabaseClient,
     private val articleService: ArticleService,
-    context: Context
+    private val context: Context
 ) {
 
     private var articleDao: ArticleDao
-    private var dataSource: ArticleRemoteDataSource
     // TODO get token from properties file
     private var token: String = "8aefceae6e4e4e2c8ea0364cdf8b5aad"
 
     init {
         articleDao = databaseClient.articleDao()
-        val options: HashMap<String, String> = HashMap()
-        options.put(language, language_type)
-        options.put(pageSize, "10")
-        options.put(page, "1")
-        dataSource = ArticleRemoteDataSource(articleService, options)
     }
 
     companion object {
@@ -81,64 +74,97 @@ class ArticleRepo(
 //    *  */
 
 
-     fun loadMoreData(pageNo: Int) {
-        val options: HashMap<String, String> = HashMap()
-        options.put(language, language_type)
-        options.put(pageSize, "10")
-        options.put(page, pageNo.toString())
-        var internationalArticle: NewsArticleResponse? = null
-        runBlocking {
-            launch(Dispatchers.IO) {
-                internationalArticle = articleService.getTopHeadLine(options)
-            }
-        }
-//        Not working with compose
-//        withContext(Dispatchers.IO) {
-//            println("Load more data server " + internationalArticle)
+//     fun loadMoreData(pageNo: Int) {
+//        val options: HashMap<String, String> = HashMap()
+//        options.put(language, language_type)
+//        options.put(pageSize, "10")
+//        options.put(page, pageNo.toString())
+//        var internationalArticle: NewsArticleResponse? = null
+//        runBlocking {
+//            launch(Dispatchers.IO) {
+//                internationalArticle = articleService.getTopHeadLine(options)
+//            }
 //        }
+////        Not working with compose
+////        withContext(Dispatchers.IO) {
+////            println("Load more data server " + internationalArticle)
+////        }
+//
+//        if (internationalArticle != null) {
+//            DatabaseClient.databaseWriteExecutor.execute(Runnable {
+//                val articles = internationalArticle!!.article
+//                for (i in 0..articles.size - 1) {
+//                    articles[i].category = "all"
+//                }
+//                articleDao.insertArticles(internationalArticle!!.article)
+//            })
+//        }
+//    }
+//
+//
+//    suspend fun refreshData() {
+//        DatabaseClient.databaseWriteExecutor.execute(Runnable {
+//            articleDao.deleteArticles()
+//        })
+//        val options: HashMap<String, String> = HashMap()
+//        options.put(language, language_type)
+//        options.put(pageSize, "10")
+//        options.put(page, "1")
+//        var internationalArticle: NewsArticleResponse? = null
+//        withContext(Dispatchers.IO) {
+//            internationalArticle = articleService.getTopHeadLine(options)
+//        }
+//        if (internationalArticle != null) {
+//            DatabaseClient.databaseWriteExecutor.execute(Runnable {
+//                val articles = internationalArticle!!.article
+//                for (i in 0..articles.size - 1) {
+//                    articles[i].category = "all"
+//                }
+//                articleDao.insertArticles(articles)
+//            })
+//        }
+//    }
 
-        if (internationalArticle != null) {
-            DatabaseClient.databaseWriteExecutor.execute(Runnable {
-                val articles = internationalArticle!!.article
-                for (i in 0..articles.size - 1) {
-                    articles[i].category = "all"
+    fun loadData(pageNo: Int): LiveData<Resource<List<NewsArticle>>> {
+        return object: NetworkManager<List<NewsArticle>, NewsArticleResponse?>() {
+
+            override fun shouldFetch(data: List<NewsArticle>?): Boolean {
+                return (data == null || data.isEmpty() || data.size < 10*pageNo) && InternetConnection.isAvailable(context = context)
+            }
+
+            override fun loadFromDb(): LiveData<List<NewsArticle>> = articleDao.getArticles()
+
+//            override fun createCall(): LiveData<APIResponse<NewsArticle>> {
+//                val options: HashMap<String, String> = HashMap()
+//                options.put(language, language_type)
+//                options.put(pageSize, "10")
+//                options.put(page, pageNo.toString())
+//                var internationalArticle: NewsArticleResponse? = null
+//                runBlocking {
+//                    launch(Dispatchers.IO) {
+//                        internationalArticle = articleService.getTopHeadLine(token, options)
+//                    }
+//                }
+//
+//            }
+
+            override suspend fun saveCallResult(item: NewsArticleResponse?) {
+                val articleList = item!!.article
+                for(i in 0..articleList.size-1) {
+                    articleList[i].category = "all"
                 }
-                articleDao.insertArticles(internationalArticle!!.article)
-            })
-        }
+                articleDao.insertArticles(articleList)
+            }
+
+            override fun createCall(): LiveData<ApiResponse<NewsArticleResponse?>> {
+                val options: HashMap<String, String> = HashMap()
+                options.put(language, language_type)
+                options.put(pageSize, "10")
+                options.put(page, pageNo.toString())
+                return articleService.getArticle2(options)
+            }
+        }.asLiveData()
     }
-
-
-    suspend fun refreshData() {
-        DatabaseClient.databaseWriteExecutor.execute(Runnable {
-            articleDao.deleteArticles()
-        })
-        val options: HashMap<String, String> = HashMap()
-        options.put(language, language_type)
-        options.put(pageSize, "10")
-        options.put(page, "1")
-        var internationalArticle: NewsArticleResponse? = null
-        withContext(Dispatchers.IO) {
-            internationalArticle = articleService.getTopHeadLine(options)
-        }
-        if (internationalArticle != null) {
-            DatabaseClient.databaseWriteExecutor.execute(Runnable {
-                val articles = internationalArticle!!.article
-                for (i in 0..articles.size - 1) {
-                    articles[i].category = "all"
-                }
-                articleDao.insertArticles(articles)
-            })
-        }
-    }
-
-    val articleData = resultLiveData<List<NewsArticle>, NewsArticleResponse>(
-        databaseQuery = { articleDao.getArticles() },
-        networkCall = { dataSource.fetchData() },
-        saveCallResult = { articleDao.insertArticles(it.article) },
-        deleteData = { articleDao.deleteArticles() },
-        shouldFetch = true
-    )
 
     /* get everything with query-search and language=en
     *   1. query to top headline(No database require only work with search live-search)

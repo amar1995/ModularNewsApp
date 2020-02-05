@@ -22,14 +22,14 @@ interface ArticleDao {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertArticles(article: List<NewsArticle>): List<Long>
+    suspend fun insertArticles(article: List<NewsArticle>): List<Long>
 
 
     @Delete
     suspend fun deleteAllArticle(articles: List<NewsArticle>)
 
     @Query("Delete from $TABLE_NAME where category = \"all\" ")
-    fun deleteArticles()
+    suspend fun deleteArticles()
 
     @Query("Delete from $TABLE_NAME where category = :category")
     suspend fun deleteCategoryArticles(category: String)

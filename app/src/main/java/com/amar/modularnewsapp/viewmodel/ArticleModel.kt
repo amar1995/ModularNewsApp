@@ -58,10 +58,12 @@ class ArticleModel(application: Application) : AndroidViewModel(application) {
             application.applicationContext
         )
     }
-    val articleData = articleRepo.articleData
-    init {
-        refreshData()
-    }
+
+    val articleData2 = articleRepo.loadData(PageSize.topHeadlineInternationalPageNo++)
+
+//    init {
+//        refreshData()
+//    }
 
     val internationalHeadline: LiveData<List<NewsArticle>> = articleRepo.internationalHeadline
 
@@ -69,25 +71,25 @@ class ArticleModel(application: Application) : AndroidViewModel(application) {
         return articleRepo.getCategoryInternationalHeadline(category)
     }
 
-    fun loadMoreData() {
-        viewModelScope.launch {
-            println("New data size " + PageSize.topHeadlineInternationalPageNo)
-            articleRepo.loadMoreData(++PageSize.topHeadlineInternationalPageNo)
-        }
-    }
-
-    fun refreshData() {
-        viewModelScope.launch {
-            try {
-                articleRepo.refreshData()
-                _eventNetworkError.value = false
-                _isNetworkErrorShown.value = false
-            } catch (networkError: IOException) {
-                if (internationalHeadline.value.isNullOrEmpty())
-                    _eventNetworkError.value = true
-            }
-        }
-    }
+//    fun loadMoreData() {
+//        viewModelScope.launch {
+//            println("New data size " + PageSize.topHeadlineInternationalPageNo)
+//            articleRepo.loadMoreData(++PageSize.topHeadlineInternationalPageNo)
+//        }
+//    }
+//
+//    fun refreshData() {
+//        viewModelScope.launch {
+//            try {
+//                articleRepo.refreshData()
+//                _eventNetworkError.value = false
+//                _isNetworkErrorShown.value = false
+//            } catch (networkError: IOException) {
+//                if (internationalHeadline.value.isNullOrEmpty())
+//                    _eventNetworkError.value = true
+//            }
+//        }
+//    }
 
     override fun onCleared() {
         super.onCleared()
