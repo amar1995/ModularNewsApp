@@ -25,8 +25,8 @@ interface ArticleDao {
     suspend fun insertArticles(article: List<NewsArticle>): List<Long>
 
 
-    @Delete
-    suspend fun deleteAllArticle(articles: List<NewsArticle>)
+    @Query("Delete from $TABLE_NAME")
+    suspend fun deleteAllArticle()
 
     @Query("Delete from $TABLE_NAME where category = \"all\" ")
     suspend fun deleteArticles()

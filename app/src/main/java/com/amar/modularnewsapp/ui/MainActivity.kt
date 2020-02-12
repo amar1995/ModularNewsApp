@@ -21,15 +21,20 @@ import androidx.ui.material.ModalDrawerLayout
 import androidx.ui.material.ripple.Ripple
 import androidx.ui.material.surface.Surface
 import androidx.ui.text.TextStyle
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.amar.data.entities.NewsArticle
-import com.amar.modularnewsapp.common.BaseViewModelFactory
 import com.amar.data.repository.PageSize
+import com.amar.data.vo.Status
+import com.amar.modularnewsapp.common.BaseViewModelFactory
+import com.amar.modularnewsapp.common.InternetConnection
 import com.amar.modularnewsapp.ui.article.ArticleTicket
 import com.amar.modularnewsapp.ui.common.TopAppBar
 import com.amar.modularnewsapp.ui.navigationBar.NavigationDrawer
 import com.amar.modularnewsapp.viewmodel.ArticleModel
-import com.amar.data.vo.Status
-import com.amar.modularnewsapp.common.InternetConnection
+import com.amar.data.worker.RefreshDataWorker
 
 private lateinit var newArticleModel: ArticleModel
 val ScrollerPosition.isAtEndOfList: Boolean get() = value >= maxPosition
@@ -45,7 +50,12 @@ class MainActivity : AppCompatActivity() {
                 BaseViewModelFactory { ArticleModel(application = this.application) })
                 .get(ArticleModel::class.java)
         println("Activty A onCreate")
-
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiresBatteryNotLow(true).build()
+        val dataRefreshWork = OneTimeWorkRequestBuilder<RefreshDataWorker>()
+            .setConstraints(constraints).build()
+//        WorkManager.getInstance(applicationContext).enqueue(dataRefreshWork)
         setContent {
             MainScreen(this)
         }
@@ -53,7 +63,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        println("Activty A onStart")
+        println("Activity A onStart")
     }
 
     override fun onResume() {
@@ -126,53 +136,56 @@ fun AppContent(onStateChange: (DrawerState) -> Unit, activty: AppCompatActivity)
     }
 }
 
+
 @Composable
 fun CustomTab(
 ) {
 
     var internationalState = observer(newArticleModel.articleData2)
-    println(">>>>>> " + internationalState)
+    var page = observer(newArticleModel.pageNo)
     Surface(color = (MaterialTheme.colors()).surface, modifier = LayoutSize.Fill) {
-        when(internationalState!!.status) {
-            Status.LOADING -> {
-                ShowLoading()
-            }
-            Status.SUCCESS -> {
-                val data = internationalState.data
-                if(data.isNullOrEmpty()) {
-                    NoContentMore()
-                } else {
-                    val scrollerPosition: ScrollerPosition = ScrollerPosition(0f)
-                    println("MainActivity data here : " + internationalState)
+        if(internationalState == null ) {
+            ShowLoading()
+        } else {
+            when (internationalState!!.status) {
+                Status.LOADING -> {
+                    ShowLoading()
+                }
+                Status.SUCCESS -> {
+                    val data = internationalState.data
+                    if (data.isNullOrEmpty()) {
+                        NoContentMore()
+                    } else {
+                        val scrollerPosition: ScrollerPosition = ScrollerPosition(0f)
 
-//                    Observe {
-//                        onCommit(scrollerPosition.isAtEndOfList) {
-//                            println("Is commit entered")
-//                            if (scrollerPosition.isAtEndOfList)
-//                                newArticleModel.loadMoreData()
+//                        Observe {
+//                            onCommit(scrollerPosition.isAtEndOfList) {
+//                                println("Is commit entered")
+//                                if (scrollerPosition.isAtEndOfList)
+//                                    newArticleModel.updatePageNo(++PageSize.topHeadlineInternationalPageNo)
+//                            }
 //                        }
-//                    }
-                    VerticalScroller(scrollerPosition = scrollerPosition) {
-                        Column(modifier = LayoutSize.Fill) {
-                            println("Page rendering size " + PageSize.topHeadlineInternationalPageNo)
-                            data.forEach {
-                                ShowArticle(article = it)
+                        VerticalScroller(scrollerPosition = scrollerPosition) {
+                            Column(modifier = LayoutSize.Fill) {
+                                data.forEach {
+                                    ShowArticle(article = it)
+                                }
                             }
                         }
                     }
                 }
-            }
-            Status.ERROR -> {
-                val context = ambient(key = ContextAmbient)
-                if(!InternetConnection.isAvailable(context = context)) {
-                    ShowError(msg = "No Internet")
-                } else {
-                    ShowError(msg = if(internationalState.message == null) "Unknow Error!!!" else internationalState.message!!)
+                Status.ERROR -> {
+                    val context = ambient(key = ContextAmbient)
+                    if (!InternetConnection.isAvailable(context = context)) {
+                        ShowError(msg = "No Internet")
+                    } else {
+                        ShowError(msg = if (internationalState.message == null) "Unknow Error!!!" else internationalState.message!!)
+                    }
                 }
-            }
-            Status.UNAUTHORIZED -> {
-                Container(alignment = Alignment.Center) {
-                    Text("Please Login")
+                Status.UNAUTHORIZED -> {
+                    Container(alignment = Alignment.Center) {
+                        Text("Please Login")
+                    }
                 }
             }
         }

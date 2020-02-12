@@ -10,6 +10,7 @@ import androidx.ui.foundation.Clickable
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
 import androidx.ui.graphics.vector.DrawVector
+import androidx.ui.graphics.vector.VectorAsset
 import androidx.ui.input.KeyboardType
 import androidx.ui.layout.*
 import androidx.ui.material.DrawerState
@@ -56,13 +57,23 @@ fun TopAppBar(
                     modifier = LayoutFlexible(1f) + LayoutGravity.Center + LayoutPadding(
                         left = 8.dp,
                         right = 8.dp
-                    )
+                    ),
+                    color = backgroundColor
                 )
                 // search bar
                 customVectorImage(
+                    vectorImage = vectorResource(R.drawable.ic_baseline_search_24),
                     onClick = onSearchClick,
                     imageHeight = 30.dp,
                     imageWidth = 20.dp,
+                    modifier = LayoutGravity.Center + LayoutPadding(right = 6.dp)
+                )
+
+                customVectorImage(
+                    vectorImage = vectorResource(id = R.drawable.ic_baseline_filter_list_24),
+                    onClick = {},
+                    imageWidth = 30.dp,
+                    imageHeight = 20.dp,
                     modifier = LayoutGravity.Center + LayoutPadding(right = 6.dp)
                 )
             }
@@ -102,9 +113,10 @@ private fun customTextFeild(
     onValueChange: (String) -> Unit = {},
     modifier: Modifier = Modifier.None,
     editorStyle: TextStyle = BODY1,
-    keyboardType: KeyboardType = KeyboardType.Ascii
+    keyboardType: KeyboardType = KeyboardType.Ascii,
+    color: Color = (MaterialTheme.colors()).background
 ) {
-    Surface(modifier = modifier, color = (MaterialTheme.colors()).background) {
+    Surface(modifier = modifier, color = color) {
         Stack {
             Wrap(Alignment.TopLeft) {
                 TextField(
@@ -128,6 +140,7 @@ private fun customTextFeild(
 
 @Composable
 private fun customVectorImage(
+    vectorImage: VectorAsset,
     onClick: () -> Unit,
     imageWidth: Dp?,
     imageHeight: Dp?,
@@ -142,7 +155,7 @@ private fun customVectorImage(
                 height = imageHeight
             ) {
                 DrawVector(
-                    vectorImage = vectorResource(R.drawable.ic_baseline_search_24),
+                    vectorImage = vectorImage,
                     tintColor = color,
                     alignment = Alignment.Center
                 )

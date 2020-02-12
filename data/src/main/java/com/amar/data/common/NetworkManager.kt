@@ -5,6 +5,7 @@ import androidx.lifecycle.MediatorLiveData
 import com.amar.data.entities.NewsArticleResponse
 import com.amar.data.service.*
 import com.amar.data.vo.Resource
+import com.amar.data.vo.Status
 import kotlinx.coroutines.*
 import retrofit2.Response
 
@@ -13,16 +14,21 @@ abstract class NetworkManager<ResultType, RequestType> {
 
     init {
         result.value = Resource.loading(null)
-        val dbSource = loadFromDb()
-        result.addSource(dbSource) { data ->
-            result.removeSource(dbSource)
-            if (shouldFetch(data)) {
-                fetchFromNetwork(dbSource)
-            } else {
-                result.addSource(dbSource) { newData ->
-                    setValue(Resource.success(newData))
+        if(!makeOnlineRequest()) {
+            val dbSource = loadFromDb()
+            result.addSource(dbSource) { data ->
+                result.removeSource(dbSource)
+                if (shouldFetch(data)) {
+                    fetchFromNetwork(dbSource)
+                } else {
+                    result.addSource(dbSource) { newData ->
+                        setValue(Resource.success(data = newData))
+                    }
                 }
             }
+        } else {
+            val dbSource = AbsentLiveData.create<ResultType>()
+            fetchFromNetwork(dbSource)
         }
     }
 
@@ -34,7 +40,6 @@ abstract class NetworkManager<ResultType, RequestType> {
 
     private fun fetchFromNetwork(dbSource: LiveData<ResultType>) {
         var apiResponse:LiveData<ApiResponse<RequestType>> = createCall()
-        println("APi response >>>>>>>> " + apiResponse)
         result.addSource(dbSource) {
             setValue(Resource.loading(it))
         }
@@ -44,32 +49,32 @@ abstract class NetworkManager<ResultType, RequestType> {
             result.removeSource(dbSource)
             when (response) {
                 is ApiSuccessResponse -> {
-                    runBlocking {
-                        println("Data: >>>>>>> " + response.body)
+                     runBlocking {
                         withContext(Dispatchers.IO) {
                             saveCallResult(processResponse(response))
                         }
-                    }
-                    result.addSource(loadFromDb()) {
-                        println(">>>>>>>> " + it)
-                        setValue(Resource.success(it))
+                         result.addSource(loadFromDb()) {
+                             setValue(Resource.success(Status.SUCCESS, it, null))
+                         }
+
                     }
                 }
                 is ApiEmptyResponse -> {
                     result.addSource(loadFromDb()) { newData ->
-                        setValue(Resource.success(newData))
+                        setValue(Resource.success(Status.SUCCESS, newData))
                     }
                 }
                 is ApiErrorResponse -> {
-                    println("Error >>>>")
-                    onFetchFailed()
                     result.addSource(dbSource) {
-                        setValue(Resource.error(response.errorMessage, it))
+                        if(it == null) {
+                            setValue(Resource.error(response.errorMessage, it))
+                        } else {
+                            setValue(Resource.success(data =  it))
+                        }
                     }
                 }
                 is UnAuthorizedResponse -> {
                     // Back to login screen
-                    println("Unauthorized >>>>")
                     result.addSource(dbSource) {
                         setValue((Resource.unauthorized()))
                     }
@@ -89,6 +94,7 @@ abstract class NetworkManager<ResultType, RequestType> {
     // check if internet available or is no data available in db
     protected abstract fun shouldFetch(data: ResultType?): Boolean
 
+    protected abstract fun makeOnlineRequest(): Boolean
     // load from database
     protected abstract fun loadFromDb(): LiveData<ResultType>
 

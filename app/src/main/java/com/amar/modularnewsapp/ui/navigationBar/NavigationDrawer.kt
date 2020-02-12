@@ -39,7 +39,6 @@ fun NavigationDrawer(
     onDrawerStateChange: (DrawerState) -> Unit,
     backgroundColor: Color
 ) {
-
     Column(LayoutHeight.Fill) {
         Container(height = 150.dp, modifier = LayoutWidth.Fill) {
             DrawImage(image = imageResource(R.drawable.news_background))
