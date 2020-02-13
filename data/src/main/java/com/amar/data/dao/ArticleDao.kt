@@ -14,7 +14,7 @@ interface ArticleDao {
     *  */
 
     @Query("Select * from $TABLE_NAME where category = \"all\" ")
-    fun getArticles(): LiveData<List<NewsArticle>>
+    suspend fun getArticles(): List<NewsArticle>
 
 
     @Query("Select * from $TABLE_NAME where category = :category")

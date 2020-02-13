@@ -63,7 +63,7 @@ class ArticleRepo private constructor(
         }
     }
 
-    val internationalHeadline: LiveData<List<NewsArticle>> = articleDao.getArticles()
+//    val internationalHeadline: LiveData<List<NewsArticle>> = articleDao.getArticles()
 
     fun getCategoryInternationalHeadline(category: String): LiveData<List<NewsArticle>> {
         return articleDao.getCategoryArticles(category)
@@ -135,7 +135,7 @@ class ArticleRepo private constructor(
                 return (data == null || data.isEmpty() || data.size < 10*pageNo) && InternetConnection.isAvailable(context = context)
             }
 
-            override fun loadFromDb(): LiveData<List<NewsArticle>> {
+            override suspend fun loadFromDb(): List<NewsArticle> {
                 val data = articleDao.getArticles()
                 return data
             }
@@ -148,7 +148,7 @@ class ArticleRepo private constructor(
                 articleDao.insertArticles(articleList)
             }
 
-            override fun createCall(): LiveData<ApiResponse<NewsArticleResponse?>> {
+            override suspend fun createCall(): ApiResponse<NewsArticleResponse?> {
                 val options: HashMap<String, String> = HashMap()
                 options.put(language, language_type)
                 options.put(pageSize, "10")
@@ -161,38 +161,38 @@ class ArticleRepo private constructor(
     }
 
 
-    fun refreshData(pageNo: Int) : LiveData<Resource<List<NewsArticle>>> {
-
-        return object: NetworkManager<List<NewsArticle>, NewsArticleResponse?>() {
-
-            override fun shouldFetch(data: List<NewsArticle>?): Boolean {
-                return true
-            }
-
-            override fun loadFromDb(): LiveData<List<NewsArticle>> {
-                val data = articleDao.getArticles()
-                return data
-            }
-
-            override suspend fun saveCallResult(item: NewsArticleResponse?) {
-                val articleList = item!!.article
-                for(i in 0..articleList.size-1) {
-                    articleList[i].category = "all"
-                }
-                articleDao.insertArticles(articleList)
-            }
-
-            override fun createCall(): LiveData<ApiResponse<NewsArticleResponse?>> {
-                val options: HashMap<String, String> = HashMap()
-                options.put(language, language_type)
-                options.put(pageSize, "10")
-                options.put(page, pageNo.toString())
-                return articleService.getArticle2(options)
-            }
-
-            override fun makeOnlineRequest(): Boolean = false
-        }.asLiveData()
-    }
+//    fun refreshData(pageNo: Int) : LiveData<Resource<List<NewsArticle>>> {
+//
+//        return object: NetworkManager<List<NewsArticle>, NewsArticleResponse?>() {
+//
+//            override fun shouldFetch(data: List<NewsArticle>?): Boolean {
+//                return true
+//            }
+//
+//            override fun loadFromDb(): LiveData<List<NewsArticle>> {
+//                val data = articleDao.getArticles()
+//                return data
+//            }
+//
+//            override suspend fun saveCallResult(item: NewsArticleResponse?) {
+//                val articleList = item!!.article
+//                for(i in 0..articleList.size-1) {
+//                    articleList[i].category = "all"
+//                }
+//                articleDao.insertArticles(articleList)
+//            }
+//
+//            override fun createCall(): LiveData<ApiResponse<NewsArticleResponse?>> {
+//                val options: HashMap<String, String> = HashMap()
+//                options.put(language, language_type)
+//                options.put(pageSize, "10")
+//                options.put(page, pageNo.toString())
+//                return articleService.getArticle2(options)
+//            }
+//
+//            override fun makeOnlineRequest(): Boolean = false
+//        }.asLiveData()
+//    }
 
     suspend fun clearData() {
         articleDao.deleteAllArticle()

@@ -158,13 +158,13 @@ fun CustomTab(
                     } else {
                         val scrollerPosition: ScrollerPosition = ScrollerPosition(0f)
 
-//                        Observe {
-//                            onCommit(scrollerPosition.isAtEndOfList) {
-//                                println("Is commit entered")
-//                                if (scrollerPosition.isAtEndOfList)
-//                                    newArticleModel.updatePageNo(++PageSize.topHeadlineInternationalPageNo)
-//                            }
-//                        }
+                        Observe {
+                            onCommit(scrollerPosition.isAtEndOfList) {
+                                println("Is commit entered")
+                                if (scrollerPosition.isAtEndOfList)
+                                    newArticleModel.updatePageNo(++PageSize.topHeadlineInternationalPageNo)
+                            }
+                        }
                         VerticalScroller(scrollerPosition = scrollerPosition) {
                             Column(modifier = LayoutSize.Fill) {
                                 data.forEach {

@@ -19,7 +19,7 @@ interface ArticleService {
     suspend fun getArticle(@QueryMap options: Map<String, String>): Response<NewsArticleResponse>
 
     @GET(API_TOP_HEADLINE + "?country=in")
-    fun getArticle2(@QueryMap options: Map<String, String>): LiveData<ApiResponse<NewsArticleResponse?>>
+    suspend fun getArticle2(@QueryMap options: Map<String, String>): ApiResponse<NewsArticleResponse?>
 
     @GET(API_EVERYTHING)
     fun getEverything(@Header("Authorization") key: String, @QueryMap options: Map<String, String>): Call<NewsArticleResponse>

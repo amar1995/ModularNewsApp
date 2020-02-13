@@ -38,8 +38,8 @@ abstract class NetworkManager<ResultType, RequestType> {
         }
     }
 
-    private fun fetchFromNetwork(dbSource: LiveData<ResultType>) {
-        var apiResponse:LiveData<ApiResponse<RequestType>> = createCall()
+    private suspend fun fetchFromNetwork(dbSource: LiveData<ResultType>) {
+        var apiResponse: ApiResponse<RequestType> = createCall()
         result.addSource(dbSource) {
             setValue(Resource.loading(it))
         }
@@ -96,8 +96,8 @@ abstract class NetworkManager<ResultType, RequestType> {
 
     protected abstract fun makeOnlineRequest(): Boolean
     // load from database
-    protected abstract fun loadFromDb(): LiveData<ResultType>
+    protected abstract suspend fun loadFromDb(): ResultType
 
     // making a network call
-    protected abstract fun createCall(): LiveData<ApiResponse<RequestType>>
+    protected abstract suspend fun createCall(): ApiResponse<RequestType>
 }

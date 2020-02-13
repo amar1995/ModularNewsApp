@@ -34,7 +34,7 @@ class ArticleModel(application: Application) : AndroidViewModel(application) {
     val pageNo: LiveData<Int>
         get() = _pageNo
 
-    val articleData2 = articleRepo.loadData(1)
+    val articleData2 = _pageNo.switchMap {  articleRepo.loadData(it) }
     fun updatePageNo(pageNo: Int) {
         if(_pageNo.value != pageNo)
             _pageNo.value = pageNo

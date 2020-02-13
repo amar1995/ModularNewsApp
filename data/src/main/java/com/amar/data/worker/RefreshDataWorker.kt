@@ -27,10 +27,10 @@ class RefreshDataWorker(appContext: Context, params: WorkerParameters) :
         val server = APIClient.retrofitServiceProvider<ArticleService>()
         val articleRepo = ArticleRepo.getInstance(database, server, applicationContext)
         database.articleDao().deleteArticles()
-        withContext(Dispatchers.Main) {
-            val data = articleRepo.refreshData(1)
-            data.observeForever(Observer<Resource<List<NewsArticle>>> {
-            })
-        }
+//        withContext(Dispatchers.Main) {
+//            val data = articleRepo.refreshData(1)
+//            data.observeForever(Observer<Resource<List<NewsArticle>>> {
+//            })
+//        }
     }
 }
