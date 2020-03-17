@@ -1,19 +1,12 @@
 package com.amar.data.worker
 
-import androidx.compose.Context
-import androidx.compose.onCommit
+import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import androidx.lifecycle.Observer
-import androidx.work.Worker
 import com.amar.data.APIClient
 import com.amar.data.DatabaseClient
-import com.amar.data.entities.NewsArticle
 import com.amar.data.repository.ArticleRepo
 import com.amar.data.service.ArticleService
-import com.amar.data.vo.Resource
-import com.amar.data.vo.Status
-import kotlinx.coroutines.*
 
 class RefreshDataWorker(appContext: Context, params: WorkerParameters) :
     CoroutineWorker(appContext, params) {

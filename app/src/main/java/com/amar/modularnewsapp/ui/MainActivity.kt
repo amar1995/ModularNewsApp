@@ -24,17 +24,16 @@ import androidx.ui.text.TextStyle
 import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
+import com.amar.data.common.InternetConnection
 import com.amar.data.entities.NewsArticle
 import com.amar.data.repository.PageSize
 import com.amar.data.vo.Status
+import com.amar.data.worker.RefreshDataWorker
 import com.amar.modularnewsapp.common.BaseViewModelFactory
-import com.amar.modularnewsapp.common.InternetConnection
 import com.amar.modularnewsapp.ui.article.ArticleTicket
 import com.amar.modularnewsapp.ui.common.TopAppBar
 import com.amar.modularnewsapp.ui.navigationBar.NavigationDrawer
 import com.amar.modularnewsapp.viewmodel.ArticleModel
-import com.amar.data.worker.RefreshDataWorker
 
 private lateinit var newArticleModel: ArticleModel
 val ScrollerPosition.isAtEndOfList: Boolean get() = value >= maxPosition
@@ -43,7 +42,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         newArticleModel =
             ViewModelProviders.of(
                 this,
@@ -130,6 +128,7 @@ fun AppContent(onStateChange: (DrawerState) -> Unit, activty: AppCompatActivity)
                     onSearchClick = {}
                 )
                 CustomTab()
+//                Text("Hello")
             }
         }
 
@@ -140,11 +139,10 @@ fun AppContent(onStateChange: (DrawerState) -> Unit, activty: AppCompatActivity)
 @Composable
 fun CustomTab(
 ) {
-
     var internationalState = observer(newArticleModel.articleData2)
     var page = observer(newArticleModel.pageNo)
     Surface(color = (MaterialTheme.colors()).surface, modifier = LayoutSize.Fill) {
-        if(internationalState == null ) {
+        if (internationalState == null) {
             ShowLoading()
         } else {
             when (internationalState!!.status) {
@@ -175,7 +173,7 @@ fun CustomTab(
                     }
                 }
                 Status.ERROR -> {
-                    val context = ambient(key = ContextAmbient)
+                    val context = ContextAmbient.current
                     if (!InternetConnection.isAvailable(context = context)) {
                         ShowError(msg = "No Internet")
                     } else {
@@ -259,6 +257,7 @@ private fun ShowError(msg: String) {
     }
 }
 
+@Composable
 fun <T> observer(data: LiveData<T>): T? {
     var result = state<T?> { data.value }
     val observer = remember { Observer<T> { result.value = it } }

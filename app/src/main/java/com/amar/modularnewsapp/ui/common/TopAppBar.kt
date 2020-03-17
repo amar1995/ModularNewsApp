@@ -19,13 +19,14 @@ import androidx.ui.material.ripple.Ripple
 import androidx.ui.material.surface.Surface
 import androidx.ui.res.vectorResource
 import androidx.ui.text.TextStyle
+import androidx.ui.text.font.FontFamily
+import androidx.ui.text.font.FontWeight
 import androidx.ui.unit.Dp
 import androidx.ui.unit.dp
+import androidx.ui.unit.sp
 import com.amar.modularnewsapp.R
 
 private const val HINT = "Search News"
-@Composable
-private val BODY1 = (MaterialTheme.typography()).body1
 
 @Composable
 fun TopAppBar(
@@ -34,20 +35,19 @@ fun TopAppBar(
     onSearchClick: () -> Unit
 ) {
     val value = state { "" }
-    Padding(6.dp) {
         Surface(
             color = backgroundColor,
-            modifier = LayoutPadding(8.dp),
+            modifier = LayoutPadding(14.dp),
             shape = RoundedCornerShape(3.dp),
             elevation = 3.dp
         ) {
-            Row() {
+            Row {
                 // Load toggle image
                 loadToggle(
                     onDrawerStateChange = onDrawerStateChange,
                     imageWidth = 30.dp,
                     imageHeight = 40.dp,
-                    modifier = LayoutGravity.Center + LayoutPadding(left = 6.dp)
+                    modifier = LayoutGravity.Center + LayoutPadding(start = 6.dp)
                 )
                 // text box
                 customTextFeild(
@@ -55,8 +55,8 @@ fun TopAppBar(
                     value = value.value,
                     onValueChange = { value.value = it },
                     modifier = LayoutFlexible(1f) + LayoutGravity.Center + LayoutPadding(
-                        left = 8.dp,
-                        right = 8.dp
+                        start = 8.dp,
+                        end = 8.dp
                     ),
                     color = backgroundColor
                 )
@@ -66,19 +66,18 @@ fun TopAppBar(
                     onClick = onSearchClick,
                     imageHeight = 30.dp,
                     imageWidth = 20.dp,
-                    modifier = LayoutGravity.Center + LayoutPadding(right = 6.dp)
+                    modifier = LayoutGravity.Center + LayoutPadding(end = 6.dp)
                 )
-
                 customVectorImage(
                     vectorImage = vectorResource(id = R.drawable.ic_baseline_filter_list_24),
                     onClick = {},
                     imageWidth = 30.dp,
                     imageHeight = 20.dp,
-                    modifier = LayoutGravity.Center + LayoutPadding(right = 6.dp)
+                    modifier = LayoutGravity.Center + LayoutPadding(end = 6.dp)
                 )
             }
         }
-    }
+
 }
 
 @Composable
@@ -112,13 +111,13 @@ private fun customTextFeild(
     value: String = "",
     onValueChange: (String) -> Unit = {},
     modifier: Modifier = Modifier.None,
-    editorStyle: TextStyle = BODY1,
+    editorStyle: TextStyle = (MaterialTheme.typography()).body1,
     keyboardType: KeyboardType = KeyboardType.Ascii,
     color: Color = (MaterialTheme.colors()).background
 ) {
     Surface(modifier = modifier, color = color) {
         Stack {
-            Wrap(Alignment.TopLeft) {
+            Wrap(Alignment.TopStart) {
                 TextField(
                     value = value,
                     onValueChange = onValueChange,
@@ -127,7 +126,7 @@ private fun customTextFeild(
                 )
             }
             if (value.isBlank()) {
-                Wrap(Alignment.TopLeft) {
+                Wrap(Alignment.TopStart) {
                     Text(
                         hint,
                         style = (MaterialTheme.typography()).body1.copy(color = Color.LightGray)

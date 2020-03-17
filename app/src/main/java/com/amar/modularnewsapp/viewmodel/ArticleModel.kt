@@ -18,8 +18,6 @@ import kotlinx.coroutines.launch
 import java.io.IOException
 
 class ArticleModel(application: Application) : AndroidViewModel(application) {
-
-
     val articleRepo: ArticleRepo by lazy {
         ArticleRepo.getInstance(
             DatabaseClient.getInstance(application),

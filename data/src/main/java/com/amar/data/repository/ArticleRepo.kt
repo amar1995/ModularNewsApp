@@ -1,6 +1,6 @@
 package com.amar.data.repository
 
-import androidx.compose.Context
+import android.content.Context
 import androidx.lifecycle.LiveData
 import com.amar.data.DatabaseClient
 import com.amar.data.common.InternetConnection
@@ -33,7 +33,7 @@ object Category {
     var pageNo: Int = 1
 }
 
-class ArticleRepo private constructor(
+class ArticleRepo(
     private val databaseClient: DatabaseClient,
     private val articleService: ArticleService,
     private val context: Context
@@ -54,16 +54,14 @@ class ArticleRepo private constructor(
             articleService: ArticleService,
             context: Context
         ): ArticleRepo {
-            return synchronized(this) {
-                if (!::articleRepo.isInitialized) {
-                    articleRepo = ArticleRepo(databaseClient, articleService, context)
-                }
-                articleRepo
+            if (!::articleRepo.isInitialized) {
+                articleRepo = ArticleRepo(databaseClient, articleService, context)
             }
+            return articleRepo
         }
     }
 
-//    val internationalHeadline: LiveData<List<NewsArticle>> = articleDao.getArticles()
+    val internationalHeadline: LiveData<List<NewsArticle>> = articleDao.getArticles()
 
     fun getCategoryInternationalHeadline(category: String): LiveData<List<NewsArticle>> {
         return articleDao.getCategoryArticles(category)
@@ -128,17 +126,14 @@ class ArticleRepo private constructor(
 //    }
 
     fun loadData(pageNo: Int): LiveData<Resource<List<NewsArticle>>> {
-        println("Data page >>> " + pageNo)
         return object: NetworkManager<List<NewsArticle>, NewsArticleResponse?>() {
 
             override fun shouldFetch(data: List<NewsArticle>?): Boolean {
                 return (data == null || data.isEmpty() || data.size < 10*pageNo) && InternetConnection.isAvailable(context = context)
             }
 
-            override suspend fun loadFromDb(): List<NewsArticle> {
-                val data = articleDao.getArticles()
-                return data
-            }
+            override fun loadFromDb(): LiveData<List<NewsArticle>> = articleDao.getArticles()
+
 
             override suspend fun saveCallResult(item: NewsArticleResponse?) {
                 val articleList = item!!.article
@@ -148,7 +143,7 @@ class ArticleRepo private constructor(
                 articleDao.insertArticles(articleList)
             }
 
-            override suspend fun createCall(): ApiResponse<NewsArticleResponse?> {
+            override fun createCall(): LiveData<ApiResponse<NewsArticleResponse?>> {
                 val options: HashMap<String, String> = HashMap()
                 options.put(language, language_type)
                 options.put(pageSize, "10")
@@ -160,43 +155,6 @@ class ArticleRepo private constructor(
         }.asLiveData()
     }
 
-
-//    fun refreshData(pageNo: Int) : LiveData<Resource<List<NewsArticle>>> {
-//
-//        return object: NetworkManager<List<NewsArticle>, NewsArticleResponse?>() {
-//
-//            override fun shouldFetch(data: List<NewsArticle>?): Boolean {
-//                return true
-//            }
-//
-//            override fun loadFromDb(): LiveData<List<NewsArticle>> {
-//                val data = articleDao.getArticles()
-//                return data
-//            }
-//
-//            override suspend fun saveCallResult(item: NewsArticleResponse?) {
-//                val articleList = item!!.article
-//                for(i in 0..articleList.size-1) {
-//                    articleList[i].category = "all"
-//                }
-//                articleDao.insertArticles(articleList)
-//            }
-//
-//            override fun createCall(): LiveData<ApiResponse<NewsArticleResponse?>> {
-//                val options: HashMap<String, String> = HashMap()
-//                options.put(language, language_type)
-//                options.put(pageSize, "10")
-//                options.put(page, pageNo.toString())
-//                return articleService.getArticle2(options)
-//            }
-//
-//            override fun makeOnlineRequest(): Boolean = false
-//        }.asLiveData()
-//    }
-
-    suspend fun clearData() {
-        articleDao.deleteAllArticle()
-    }
     /* get everything with query-search and language=en
     *   1. query to top headline(No database require only work with search live-search)
     * */

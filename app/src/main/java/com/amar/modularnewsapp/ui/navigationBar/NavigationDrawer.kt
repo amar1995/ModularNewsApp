@@ -2,16 +2,18 @@ package com.amar.modularnewsapp.ui.navigationBar
 
 import androidx.annotation.DrawableRes
 import androidx.compose.Composable
-import androidx.compose.unaryPlus
-import androidx.ui.core.*
-import androidx.ui.foundation.DrawImage
+import androidx.ui.core.Modifier
+import androidx.ui.core.Text
+import androidx.ui.foundation.SimpleImage
 import androidx.ui.foundation.VerticalScroller
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
-import androidx.ui.graphics.toArgb
 import androidx.ui.graphics.vector.DrawVector
 import androidx.ui.layout.*
-import androidx.ui.material.*
+import androidx.ui.material.Button
+import androidx.ui.material.Divider
+import androidx.ui.material.DrawerState
+import androidx.ui.material.MaterialTheme
 import androidx.ui.material.surface.Surface
 import androidx.ui.res.imageResource
 import androidx.ui.res.vectorResource
@@ -41,7 +43,7 @@ fun NavigationDrawer(
 ) {
     Column(LayoutHeight.Fill) {
         Container(height = 150.dp, modifier = LayoutWidth.Fill) {
-            DrawImage(image = imageResource(R.drawable.news_background))
+            SimpleImage(image = imageResource(R.drawable.news_background))
         }
         Surface(
             color = backgroundColor,
@@ -137,16 +139,15 @@ fun NavigationDrawer(
                 }
             }
         }
-        Padding(8.dp) {
-            Column {
-                Divider(color = Color.Gray)
-                Text(
-                    text = POWERED,
-                    modifier = LayoutGravity.Center + LayoutPadding(8.dp)
-                )
-                Divider(color = Color.Gray)
-            }
+        Column(LayoutPadding(8.dp)) {
+            Divider(color = Color.Gray)
+            Text(
+                text = POWERED,
+                modifier = LayoutGravity.Center + LayoutPadding(8.dp)
+            )
+            Divider(color = Color.Gray)
         }
+
     }
 
 }
@@ -169,11 +170,11 @@ private fun DrawerButton(
         (MaterialTheme.colors()).surface
     }
     Surface(
-        modifier = Modifier.None + LayoutPadding(left = 8.dp, top = 8.dp, right = 8.dp),
+        modifier = LayoutPadding(start = 8.dp, top = 8.dp, end = 8.dp),
         color = backgroundColor,
         shape = RoundedCornerShape(4.dp)
     ) {
-        Button(onClick = action, style = TextButtonStyle()) {
+        Button(onClick = action) {
             Row(LayoutWidth.Fill) {
                 VectorImage(
                     id = icon,
@@ -194,14 +195,13 @@ private fun DrawerButton(
 @Composable
 private fun SimpleImage(@DrawableRes id: Int, tint: Color = Color.Transparent) {
     val image = imageResource(id)
-    WithDensity {
-        Container(
-            width = 20.dp,
-            height = 20.dp
-        ) {
-            DrawImage(image, tint)
-        }
+    Container(
+        width = 20.dp,
+        height = 20.dp
+    ) {
+        SimpleImage(image, tint)
     }
+
 }
 
 // --- dev03
@@ -224,11 +224,10 @@ fun VectorImage(
     tint: Color = Color.Transparent
 ) {
     val vector = vectorResource(id)
-    WithDensity {
-        Container(
-            modifier = modifier + LayoutSize(vector.defaultWidth, vector.defaultHeight)
-        ) {
-            DrawVector(vector, tint)
-        }
+    Container(
+        modifier = modifier + LayoutSize(vector.defaultWidth, vector.defaultHeight)
+    ) {
+        DrawVector(vector, tint)
     }
+
 }

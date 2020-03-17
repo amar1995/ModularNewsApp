@@ -2,7 +2,7 @@ package com.amar.data.common
 
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
-import androidx.compose.Context
+import android.content.Context
 
 object InternetConnection {
     fun isAvailable(context: Context): Boolean {

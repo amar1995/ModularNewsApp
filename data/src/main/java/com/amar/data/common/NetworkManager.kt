@@ -27,6 +27,7 @@ abstract class NetworkManager<ResultType, RequestType> {
                 }
             }
         } else {
+            // only online request for search system ....
             val dbSource = AbsentLiveData.create<ResultType>()
             fetchFromNetwork(dbSource)
         }
@@ -38,8 +39,8 @@ abstract class NetworkManager<ResultType, RequestType> {
         }
     }
 
-    private suspend fun fetchFromNetwork(dbSource: LiveData<ResultType>) {
-        var apiResponse: ApiResponse<RequestType> = createCall()
+    private fun fetchFromNetwork(dbSource: LiveData<ResultType>) {
+        var apiResponse: LiveData<ApiResponse<RequestType>> = createCall()
         result.addSource(dbSource) {
             setValue(Resource.loading(it))
         }
@@ -56,7 +57,6 @@ abstract class NetworkManager<ResultType, RequestType> {
                          result.addSource(loadFromDb()) {
                              setValue(Resource.success(Status.SUCCESS, it, null))
                          }
-
                     }
                 }
                 is ApiEmptyResponse -> {
@@ -96,8 +96,8 @@ abstract class NetworkManager<ResultType, RequestType> {
 
     protected abstract fun makeOnlineRequest(): Boolean
     // load from database
-    protected abstract suspend fun loadFromDb(): ResultType
+    protected abstract fun loadFromDb(): LiveData<ResultType>
 
     // making a network call
-    protected abstract suspend fun createCall(): ApiResponse<RequestType>
+    protected abstract fun createCall(): LiveData<ApiResponse<RequestType>>
 }
