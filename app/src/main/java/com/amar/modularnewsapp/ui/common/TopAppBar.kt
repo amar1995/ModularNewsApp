@@ -11,6 +11,7 @@ import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
 import androidx.ui.graphics.vector.DrawVector
 import androidx.ui.graphics.vector.VectorAsset
+import androidx.ui.input.ImeAction
 import androidx.ui.input.KeyboardType
 import androidx.ui.layout.*
 import androidx.ui.material.DrawerState
@@ -58,7 +59,8 @@ fun TopAppBar(
                         start = 8.dp,
                         end = 8.dp
                     ),
-                    color = backgroundColor
+                    color = backgroundColor,
+                    onSearchClick = onSearchClick
                 )
                 // search bar
                 customVectorImage(
@@ -66,7 +68,7 @@ fun TopAppBar(
                     onClick = onSearchClick,
                     imageHeight = 30.dp,
                     imageWidth = 20.dp,
-                    modifier = LayoutGravity.Center + LayoutPadding(end = 6.dp)
+                    modifier = LayoutGravity.Center + LayoutPadding(end = 16.dp)
                 )
             }
         }
@@ -106,7 +108,8 @@ private fun customTextFeild(
     modifier: Modifier = Modifier.None,
     editorStyle: TextStyle = (MaterialTheme.typography()).body1,
     keyboardType: KeyboardType = KeyboardType.Ascii,
-    color: Color = (MaterialTheme.colors()).background
+    color: Color = (MaterialTheme.colors()).background,
+    onSearchClick: () -> Unit
 ) {
     Surface(modifier = modifier, color = color) {
         Stack {
@@ -115,7 +118,9 @@ private fun customTextFeild(
                     value = value,
                     onValueChange = onValueChange,
                     textStyle = editorStyle,
-                    keyboardType = keyboardType
+                    keyboardType = keyboardType,
+                    imeAction = ImeAction.Search,
+                    onImeActionPerformed = { onSearchClick() }
                 )
             }
             if (value.isBlank()) {

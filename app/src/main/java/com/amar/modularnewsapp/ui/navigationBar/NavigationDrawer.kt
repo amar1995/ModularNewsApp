@@ -1,5 +1,7 @@
 package com.amar.modularnewsapp.ui.navigationBar
 
+import android.content.Context
+import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.compose.Composable
 import androidx.ui.core.Modifier
@@ -39,7 +41,8 @@ private const val POWERED = "Powered By NewsApiOrg"
 @Composable
 fun NavigationDrawer(
     onDrawerStateChange: (DrawerState) -> Unit,
-    backgroundColor: Color
+    backgroundColor: Color,
+    context: Context
 ) {
     Column(LayoutHeight.Fill) {
         Container(height = 150.dp, modifier = LayoutWidth.Fill) {
@@ -64,6 +67,7 @@ fun NavigationDrawer(
                         label = NewsType.General.name,
                         isSelected = false,
                         action = {
+                            makeToast(context)
                             onDrawerStateChange(DrawerState.Closed)
                         }
                     )
@@ -71,7 +75,7 @@ fun NavigationDrawer(
                     Text(
                         text = "Category",
                         style = TextStyle(
-                            color = (MaterialTheme.colors()).onBackground,
+                            color = (MaterialTheme.colors()).onSurface,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.W500
                         ),
@@ -82,6 +86,7 @@ fun NavigationDrawer(
                         label = NewsType.Business.name,
                         isSelected = false,
                         action = {
+                            makeToast(context)
                             onDrawerStateChange(DrawerState.Closed)
                         }
                     )
@@ -90,6 +95,7 @@ fun NavigationDrawer(
                         label = NewsType.Sports.name,
                         isSelected = false,
                         action = {
+                            makeToast(context)
                             onDrawerStateChange(DrawerState.Closed)
                         }
                     )
@@ -98,6 +104,7 @@ fun NavigationDrawer(
                         label = NewsType.Entertainment.name,
                         isSelected = false,
                         action = {
+                            makeToast(context)
                             onDrawerStateChange(DrawerState.Closed)
                         }
                     )
@@ -115,6 +122,7 @@ fun NavigationDrawer(
                         label = NewsType.Science.name,
                         isSelected = false,
                         action = {
+                            makeToast(context)
                             onDrawerStateChange(DrawerState.Closed)
                         }
                     )
@@ -123,6 +131,7 @@ fun NavigationDrawer(
                         label = NewsType.Technology.name,
                         isSelected = false,
                         action = {
+                            makeToast(context)
                             onDrawerStateChange(DrawerState.Closed)
                         }
                     )
@@ -133,6 +142,7 @@ fun NavigationDrawer(
                         label = "Setting",
                         isSelected = false,
                         action = {
+                            makeToast(context)
                             onDrawerStateChange(DrawerState.Closed)
                         }
                     )
@@ -214,7 +224,9 @@ private fun SimpleImage(@DrawableRes id: Int, tint: Color = Color.Transparent) {
     }
 
 }
-
+private fun makeToast(context: Context, msg: String = "TBD...") {
+    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+}
 // --- dev03
 //@Composable
 //private fun VectorImage(@DrawableRes id: Int, tint: Color = Color.Transparent) {
