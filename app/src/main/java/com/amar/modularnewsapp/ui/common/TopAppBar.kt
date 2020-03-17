@@ -39,7 +39,7 @@ fun TopAppBar(
             color = backgroundColor,
             modifier = LayoutPadding(14.dp),
             shape = RoundedCornerShape(3.dp),
-            elevation = 3.dp
+            elevation = 1.dp
         ) {
             Row {
                 // Load toggle image
@@ -68,13 +68,6 @@ fun TopAppBar(
                     imageWidth = 20.dp,
                     modifier = LayoutGravity.Center + LayoutPadding(end = 6.dp)
                 )
-                customVectorImage(
-                    vectorImage = vectorResource(id = R.drawable.ic_baseline_filter_list_24),
-                    onClick = {},
-                    imageWidth = 30.dp,
-                    imageHeight = 20.dp,
-                    modifier = LayoutGravity.Center + LayoutPadding(end = 6.dp)
-                )
             }
         }
 
@@ -86,7 +79,7 @@ private fun loadToggle(
     imageWidth: Dp?,
     imageHeight: Dp?,
     modifier: Modifier = Modifier.None,
-    color: Color = Color.White
+    color: Color = (MaterialTheme.colors()).onBackground
 ) {
     Ripple(bounded = false, color = Color.DarkGray) {
         Clickable(onClick = { onDrawerStateChange(DrawerState.Opened) }) {
@@ -144,7 +137,7 @@ private fun customVectorImage(
     imageWidth: Dp?,
     imageHeight: Dp?,
     modifier: Modifier = Modifier.None,
-    color: Color = Color.White
+    color: Color = (MaterialTheme.colors()).onBackground
 ) {
     Ripple(bounded = false, color = Color.DarkGray) {
         Clickable(onClick = onClick) {

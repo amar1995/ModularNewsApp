@@ -71,7 +71,7 @@ fun NavigationDrawer(
                     Text(
                         text = "Category",
                         style = TextStyle(
-                            color = Color.White,
+                            color = (MaterialTheme.colors()).onBackground,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.W500
                         ),
@@ -140,12 +140,13 @@ fun NavigationDrawer(
             }
         }
         Column(LayoutPadding(8.dp)) {
-            Divider(color = Color.Gray)
+            Divider(color = (MaterialTheme.colors()).onSurface)
             Text(
                 text = POWERED,
-                modifier = LayoutGravity.Center + LayoutPadding(8.dp)
+                modifier = LayoutGravity.Center + LayoutPadding(8.dp),
+                style = (MaterialTheme.typography()).body2.copy(color = (MaterialTheme.colors()).onBackground)
             )
-            Divider(color = Color.Gray)
+            Divider(color = (MaterialTheme.colors()).onSurface)
         }
 
     }
@@ -174,7 +175,17 @@ private fun DrawerButton(
         color = backgroundColor,
         shape = RoundedCornerShape(4.dp)
     ) {
-        Button(onClick = action) {
+        Button(onClick = action,
+            backgroundColor = Color.Transparent,
+            shape = MaterialTheme.shapes().button,
+            paddings = EdgeInsets(
+                left = 16.dp,
+                right = 16.dp,
+                top = 8.dp,
+                bottom = 8.dp
+            ).copy(left = 8.dp, right = 8.dp),
+            contentColor = MaterialTheme.colors().primary,
+            elevation = 0.dp){
             Row(LayoutWidth.Fill) {
                 VectorImage(
                     id = icon,

@@ -20,7 +20,7 @@ fun ArticleTicket(
 ) {
     val typography = MaterialTheme.typography()
     Surface(
-        color = Color(0xFF2D2D2D),
+        color = backgroundColor,
         modifier = LayoutPadding(16.dp),
         shape = RoundedCornerShape(10.dp)
     ) {

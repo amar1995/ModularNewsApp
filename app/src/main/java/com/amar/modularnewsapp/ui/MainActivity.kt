@@ -7,20 +7,18 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.ui.core.*
-import androidx.ui.foundation.Clickable
-import androidx.ui.foundation.ScrollerPosition
-import androidx.ui.foundation.VerticalScroller
-import androidx.ui.foundation.isSystemInDarkTheme
+import androidx.ui.foundation.*
 import androidx.ui.graphics.Color
 import androidx.ui.layout.Column
+import androidx.ui.layout.Row
 import androidx.ui.layout.Container
 import androidx.ui.layout.LayoutSize
-import androidx.ui.material.DrawerState
-import androidx.ui.material.MaterialTheme
-import androidx.ui.material.ModalDrawerLayout
+import androidx.ui.layout.LayoutWidth
+import androidx.ui.material.*
 import androidx.ui.material.ripple.Ripple
 import androidx.ui.material.surface.Surface
 import androidx.ui.text.TextStyle
+import androidx.ui.unit.dp
 import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
@@ -98,27 +96,34 @@ fun MainScreen(activity: AppCompatActivity) {
         typography = themeTypography
     ) {
         val (drawerState, onStateChange) = state { DrawerState.Closed }
-
-        ModalDrawerLayout(
-            drawerState = drawerState,
-            onStateChange = onStateChange,
+        val (bottomDrawerState, bottomOnStateChange) = state { DrawerState.Closed }
+        BottomDrawerLayout(drawerState = bottomDrawerState,
+            onStateChange = bottomOnStateChange,
             gesturesEnabled = false,
             drawerContent = {
-                NavigationDrawer(
-                    onDrawerStateChange = onStateChange,
-                    backgroundColor = (MaterialTheme.colors()).surface
-                )
-            },
-            bodyContent = {
-                AppContent(onStateChange = onStateChange, activty = activity)
-            }
-        )
+            Text("Hello to news lover")
+        }) {
+            ModalDrawerLayout(
+                drawerState = drawerState,
+                onStateChange = onStateChange,
+                gesturesEnabled = false,
+                drawerContent = {
+                    NavigationDrawer(
+                        onDrawerStateChange = onStateChange,
+                        backgroundColor = (MaterialTheme.colors()).surface
+                    )
+                },
+                bodyContent = {
+                    AppContent(onStateChange = onStateChange,bottomOnStateChange = bottomOnStateChange, activty = activity)
+                }
+            )
+        }
     }
 }
 
 
 @Composable
-fun AppContent(onStateChange: (DrawerState) -> Unit, activty: AppCompatActivity) {
+fun AppContent(onStateChange: (DrawerState) -> Unit,bottomOnStateChange: (DrawerState)-> Unit, activty: AppCompatActivity) {
     Column() {
         Surface(color = (MaterialTheme.colors()).surface) {
             Column {
@@ -127,7 +132,7 @@ fun AppContent(onStateChange: (DrawerState) -> Unit, activty: AppCompatActivity)
                     backgroundColor = (MaterialTheme.colors()).background,
                     onSearchClick = {}
                 )
-                CustomTab()
+                CustomTab(bottomOnStateChange)
 //                Text("Hello")
             }
         }
@@ -138,21 +143,22 @@ fun AppContent(onStateChange: (DrawerState) -> Unit, activty: AppCompatActivity)
 
 @Composable
 fun CustomTab(
+    bottomOnStateChange: (DrawerState) -> Unit
 ) {
     var internationalState = observer(newArticleModel.articleData2)
     var page = observer(newArticleModel.pageNo)
     Surface(color = (MaterialTheme.colors()).surface, modifier = LayoutSize.Fill) {
         if (internationalState == null) {
-            ShowLoading()
+            showLoading()
         } else {
             when (internationalState!!.status) {
                 Status.LOADING -> {
-                    ShowLoading()
+                    showLoading()
                 }
                 Status.SUCCESS -> {
                     val data = internationalState.data
                     if (data.isNullOrEmpty()) {
-                        NoContentMore()
+                        noContentMore()
                     } else {
                         val scrollerPosition: ScrollerPosition = ScrollerPosition(0f)
 
@@ -166,7 +172,9 @@ fun CustomTab(
                         VerticalScroller(scrollerPosition = scrollerPosition) {
                             Column(modifier = LayoutSize.Fill) {
                                 data.forEach {
-                                    ShowArticle(article = it)
+                                    ShowArticle(article = it, onClick = {
+                                        bottomOnStateChange(DrawerState.Opened)
+                                    })
                                 }
                             }
                         }
@@ -175,53 +183,28 @@ fun CustomTab(
                 Status.ERROR -> {
                     val context = ContextAmbient.current
                     if (!InternetConnection.isAvailable(context = context)) {
-                        ShowError(msg = "No Internet")
+                        showError(msg = "No Internet")
                     } else {
-                        ShowError(msg = if (internationalState.message == null) "Unknow Error!!!" else internationalState.message!!)
+                        showError(msg = if (internationalState.message == null) "Unknow Error!!!" else internationalState.message!!)
                     }
                 }
                 Status.UNAUTHORIZED -> {
                     Container(alignment = Alignment.Center) {
-                        Text("Please Login")
+                        Text("Please add the news.org token")
                     }
                 }
             }
         }
-
-//        if (internationalState == null) {
-//            ShowLoading()
-//        } else if (internationalState.isEmpty()) {
-//            NoContentMore()
-//        } else {
-//            val scrollerPosition: ScrollerPosition = ScrollerPosition(0f)
-//            println("MainActivity data here : " + internationalState)
-//
-//            Observe {
-//                onCommit(scrollerPosition.isAtEndOfList) {
-//                    println("Is commit entered")
-//                    if (scrollerPosition.isAtEndOfList)
-//                        newArticleModel.loadMoreData()
-//                }
-//            }
-//            VerticalScroller(scrollerPosition = scrollerPosition) {
-//                Column(modifier = LayoutSize.Fill) {
-//                    println("Page rendering size " + PageSize.topHeadlineInternationalPageNo)
-//                    internationalState!!.forEach {
-//                        ShowArticle(article = it)
-//                    }
-//                }
-//            }
-//        }
     }
 }
 
 @Composable
 private fun ShowArticle(
-    @Pivotal article: NewsArticle
+    @Pivotal article: NewsArticle,
+    onClick : () -> Unit
 ) {
-    println(article)
     Ripple(bounded = true) {
-        Clickable() {
+        Clickable(onClick = onClick) {
             ArticleTicket(
                 backgroundColor = (MaterialTheme.colors()).background,
                 article = article
@@ -231,14 +214,14 @@ private fun ShowArticle(
 }
 
 @Composable
-private fun NoContentMore(modifier: Modifier = Modifier.None) {
+private fun noContentMore(modifier: Modifier = Modifier.None) {
     Container(modifier = modifier) {
         Text("No more to show....")
     }
 }
 
 @Composable
-private fun ShowLoading(
+private fun showLoading(
     color: Color = (MaterialTheme.colors()).primary,
     modifier: Modifier = Modifier.None
 ) {
@@ -248,7 +231,7 @@ private fun ShowLoading(
 }
 
 @Composable
-private fun ShowError(msg: String) {
+private fun showError(msg: String) {
     Container(alignment = Alignment.Center) {
         Text(
             msg,
@@ -257,6 +240,10 @@ private fun ShowError(msg: String) {
     }
 }
 
+@Composable
+private fun showNewArticleInDetail(article: NewsArticle) {
+
+}
 @Composable
 fun <T> observer(data: LiveData<T>): T? {
     var result = state<T?> { data.value }
