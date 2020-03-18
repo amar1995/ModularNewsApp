@@ -8,8 +8,11 @@ There is two module in this app
 
 I also added dark and light mode for this app which is really simple to deal in compose-ui.
 
+<img src="/doc_image/darkModeNewsApp.jpeg" width="30%" height="500px">   <img src="/doc_image/lightModeNewsApp.jpeg" width="30%" height="500px">
+
 # Code Setup
 You will require latest version of android studio. Currently, I am using android studio android studio 4.0 Canary 1. 
+
 
 <b>API KEY setup</b>
 1. Login/Register to [newsapi.org](https://newsapi.org/) and then generate your api key.
