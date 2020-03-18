@@ -3,6 +3,11 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
+// Read credentials
+def credentialFile = rootProject.file("credential.properties")
+def credentialProperty = new Properties()
+credentialProperty.load(new FileInputStream(credentialFile))
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
@@ -12,9 +17,9 @@ android {
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
+        buildConfigField("String", "NEWS_API_KEY", credentialProperty['NEWS_API_KEY'])
     }
 
     buildTypes {
@@ -22,6 +27,13 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
     // --- Comment to use kapt annotation processor
 //    buildFeatures {
@@ -37,6 +49,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+//    implementation("androidx.compose:compose-runtime:$compose_version")
     // ---  Room database library
 
     implementation "androidx.room:room-runtime:$room_version"
@@ -47,4 +60,9 @@ dependencies {
     // --- Retrofit library
     implementation("com.squareup.retrofit2:retrofit:$retrofit_version")
     implementation("com.squareup.retrofit2:converter-gson:$retrofit_version")
+
+    // Kotlin + coroutines
+    implementation "androidx.work:work-runtime-ktx:$workmanager_version"
+
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$liveDataKtx_version"
 }

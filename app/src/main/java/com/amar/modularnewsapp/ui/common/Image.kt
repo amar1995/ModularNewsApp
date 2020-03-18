@@ -9,13 +9,15 @@ import androidx.compose.onCommit
 import androidx.compose.state
 import androidx.core.graphics.drawable.toBitmap
 import androidx.ui.core.Draw
-import androidx.ui.foundation.DrawImage
+import androidx.ui.foundation.SimpleImage
+import androidx.ui.graphics.Canvas
 import androidx.ui.graphics.Image
 import androidx.ui.graphics.ImageConfig
 import androidx.ui.graphics.NativeImage
 import androidx.ui.graphics.colorspace.ColorSpace
 import androidx.ui.graphics.colorspace.ColorSpaces
 import androidx.ui.unit.Dp
+import androidx.ui.unit.PxSize
 import com.amar.modularnewsapp.R
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
@@ -70,9 +72,9 @@ fun Image(url: String, width: Dp, height: Dp) {
     val theImage = image
     val theDrawable = drawable
     if (theImage != null) {
-        DrawImage(image = theImage)
+        SimpleImage(image = theImage)
     } else if (theDrawable != null) {
-        Draw { canvas, parentSize -> theDrawable.draw(canvas.nativeCanvas) }
+        Draw { canvas: Canvas, _: PxSize -> theDrawable.draw(canvas.nativeCanvas) }
     }
 }
 

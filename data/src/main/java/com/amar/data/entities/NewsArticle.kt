@@ -49,9 +49,9 @@ data class NewsArticle(
     @Embedded
     val source: Source?,
 
-    @ColumnInfo(name = Source.Column.id)
-    @PrimaryKey(autoGenerate = true)
-    val id: Long,
+//    @ColumnInfo(name = Source.Column.id)
+//    @PrimaryKey(autoGenerate = true)
+//    val id: Long,
 
     @ColumnInfo(name = Source.Column.author)
     @SerializedName(Source.GsonConst.author)
@@ -67,7 +67,8 @@ data class NewsArticle(
 
     @ColumnInfo(name = Source.Column.url)
     @SerializedName(Source.GsonConst.url)
-    val url: String?,
+    @PrimaryKey
+    val url: String,
 
     @ColumnInfo(name = Source.Column.imageUrl)
     @SerializedName(Source.GsonConst.imageUrl)

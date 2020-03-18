@@ -12,7 +12,7 @@ val lightThemeColors = lightColorPalette(
     secondary = Color(0xffffffff),
     onSecondary = Color.White,
     surface = Color(0xffffffff),
-    background = Color.LightGray,
+    background = Color.LightGray.copy(alpha = 0.2f),
     onBackground = Color.Black,
     onSurface = Color.Black,
     error = Color(0xFFD00036),
@@ -30,7 +30,9 @@ val darkThemeColors = darkColorPalette(
     secondary = Color(0xFF121212),
     onSecondary = Color.White,
     surface = Color(0xFF191919),
-    background = Color(0xFF555454),
+    background = Color(0xFF2D2D2D),
     onBackground = Color.White,
-    onSurface = Color.White
+    onSurface = Color.White,
+    error = Color(0xFFD00036),
+    onError = Color.White
 )

@@ -10,6 +10,8 @@ import androidx.ui.foundation.Clickable
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
 import androidx.ui.graphics.vector.DrawVector
+import androidx.ui.graphics.vector.VectorAsset
+import androidx.ui.input.ImeAction
 import androidx.ui.input.KeyboardType
 import androidx.ui.layout.*
 import androidx.ui.material.DrawerState
@@ -18,13 +20,14 @@ import androidx.ui.material.ripple.Ripple
 import androidx.ui.material.surface.Surface
 import androidx.ui.res.vectorResource
 import androidx.ui.text.TextStyle
+import androidx.ui.text.font.FontFamily
+import androidx.ui.text.font.FontWeight
 import androidx.ui.unit.Dp
 import androidx.ui.unit.dp
+import androidx.ui.unit.sp
 import com.amar.modularnewsapp.R
 
 private const val HINT = "Search News"
-@Composable
-private val BODY1 = (MaterialTheme.typography()).body1
 
 @Composable
 fun TopAppBar(
@@ -33,20 +36,19 @@ fun TopAppBar(
     onSearchClick: () -> Unit
 ) {
     val value = state { "" }
-    Padding(6.dp) {
         Surface(
             color = backgroundColor,
-            modifier = LayoutPadding(8.dp),
+            modifier = LayoutPadding(14.dp),
             shape = RoundedCornerShape(3.dp),
-            elevation = 3.dp
+            elevation = 1.dp
         ) {
-            Row() {
+            Row {
                 // Load toggle image
                 loadToggle(
                     onDrawerStateChange = onDrawerStateChange,
                     imageWidth = 30.dp,
                     imageHeight = 40.dp,
-                    modifier = LayoutGravity.Center + LayoutPadding(left = 6.dp)
+                    modifier = LayoutGravity.Center + LayoutPadding(start = 6.dp)
                 )
                 // text box
                 customTextFeild(
@@ -54,20 +56,23 @@ fun TopAppBar(
                     value = value.value,
                     onValueChange = { value.value = it },
                     modifier = LayoutFlexible(1f) + LayoutGravity.Center + LayoutPadding(
-                        left = 8.dp,
-                        right = 8.dp
-                    )
+                        start = 8.dp,
+                        end = 8.dp
+                    ),
+                    color = backgroundColor,
+                    onSearchClick = onSearchClick
                 )
                 // search bar
                 customVectorImage(
+                    vectorImage = vectorResource(R.drawable.ic_baseline_search_24),
                     onClick = onSearchClick,
                     imageHeight = 30.dp,
                     imageWidth = 20.dp,
-                    modifier = LayoutGravity.Center + LayoutPadding(right = 6.dp)
+                    modifier = LayoutGravity.Center + LayoutPadding(end = 16.dp)
                 )
             }
         }
-    }
+
 }
 
 @Composable
@@ -76,7 +81,7 @@ private fun loadToggle(
     imageWidth: Dp?,
     imageHeight: Dp?,
     modifier: Modifier = Modifier.None,
-    color: Color = Color.White
+    color: Color = (MaterialTheme.colors()).onBackground
 ) {
     Ripple(bounded = false, color = Color.DarkGray) {
         Clickable(onClick = { onDrawerStateChange(DrawerState.Opened) }) {
@@ -101,21 +106,25 @@ private fun customTextFeild(
     value: String = "",
     onValueChange: (String) -> Unit = {},
     modifier: Modifier = Modifier.None,
-    editorStyle: TextStyle = BODY1,
-    keyboardType: KeyboardType = KeyboardType.Ascii
+    editorStyle: TextStyle = (MaterialTheme.typography()).body1,
+    keyboardType: KeyboardType = KeyboardType.Ascii,
+    color: Color = (MaterialTheme.colors()).background,
+    onSearchClick: () -> Unit
 ) {
-    Surface(modifier = modifier, color = (MaterialTheme.colors()).background) {
+    Surface(modifier = modifier, color = color) {
         Stack {
-            Wrap(Alignment.TopLeft) {
+            Wrap(Alignment.TopStart) {
                 TextField(
                     value = value,
                     onValueChange = onValueChange,
                     textStyle = editorStyle,
-                    keyboardType = keyboardType
+                    keyboardType = keyboardType,
+                    imeAction = ImeAction.Search,
+                    onImeActionPerformed = { onSearchClick() }
                 )
             }
             if (value.isBlank()) {
-                Wrap(Alignment.TopLeft) {
+                Wrap(Alignment.TopStart) {
                     Text(
                         hint,
                         style = (MaterialTheme.typography()).body1.copy(color = Color.LightGray)
@@ -128,11 +137,12 @@ private fun customTextFeild(
 
 @Composable
 private fun customVectorImage(
+    vectorImage: VectorAsset,
     onClick: () -> Unit,
     imageWidth: Dp?,
     imageHeight: Dp?,
     modifier: Modifier = Modifier.None,
-    color: Color = Color.White
+    color: Color = (MaterialTheme.colors()).onBackground
 ) {
     Ripple(bounded = false, color = Color.DarkGray) {
         Clickable(onClick = onClick) {
@@ -142,7 +152,7 @@ private fun customVectorImage(
                 height = imageHeight
             ) {
                 DrawVector(
-                    vectorImage = vectorResource(R.drawable.ic_baseline_search_24),
+                    vectorImage = vectorImage,
                     tintColor = color,
                     alignment = Alignment.Center
                 )
