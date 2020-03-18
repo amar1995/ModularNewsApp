@@ -25,6 +25,7 @@ import androidx.ui.unit.dp
 import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.amar.data.common.InternetConnection
 import com.amar.data.entities.NewsArticle
 import com.amar.data.repository.PageSize
@@ -57,6 +58,7 @@ class MainActivity : AppCompatActivity() {
             .setRequiresBatteryNotLow(true).build()
         val dataRefreshWork = OneTimeWorkRequestBuilder<RefreshDataWorker>()
             .setConstraints(constraints).build()
+//        --------- uncomment to refresh on app start
 //        WorkManager.getInstance(applicationContext).enqueue(dataRefreshWork)
         setContent {
             MainScreen(this)

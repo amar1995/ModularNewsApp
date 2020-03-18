@@ -8,11 +8,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class APIClient {
-
     companion object {
-        private val token = "8aefceae6e4e4e2c8ea0364cdf8b5aad"
         val client = OkHttpClient.Builder()
-            .addInterceptor(AuthInterceptor(token))
+            .addInterceptor(AuthInterceptor(BuildConfig.NEWS_API_KEY))
             .build()
         inline fun <reified T> retrofitServiceProvider(): T {
             println("Is adapter called")
