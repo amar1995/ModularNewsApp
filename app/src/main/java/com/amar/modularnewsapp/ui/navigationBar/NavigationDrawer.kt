@@ -4,19 +4,16 @@ import android.content.Context
 import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.compose.Composable
+import androidx.ui.core.Alignment
 import androidx.ui.core.Modifier
-import androidx.ui.core.Text
-import androidx.ui.foundation.SimpleImage
-import androidx.ui.foundation.VerticalScroller
-import androidx.ui.foundation.shape.corner.RoundedCornerShape
+import androidx.ui.foundation.Image
+import androidx.ui.foundation.ScrollableColumn
+import androidx.ui.foundation.Text
+import androidx.ui.graphics.BlendMode
 import androidx.ui.graphics.Color
-import androidx.ui.graphics.vector.DrawVector
+import androidx.ui.graphics.ColorFilter
 import androidx.ui.layout.*
-import androidx.ui.material.Button
-import androidx.ui.material.Divider
-import androidx.ui.material.DrawerState
-import androidx.ui.material.MaterialTheme
-import androidx.ui.material.surface.Surface
+import androidx.ui.material.*
 import androidx.ui.res.imageResource
 import androidx.ui.res.vectorResource
 import androidx.ui.text.TextStyle
@@ -24,17 +21,7 @@ import androidx.ui.text.font.FontWeight
 import androidx.ui.unit.dp
 import androidx.ui.unit.sp
 import com.amar.modularnewsapp.R
-
-enum class NewsType {
-    TopHeadline,
-    Business,
-    Entertainment,
-    General,
-    Health,
-    Science,
-    Sports,
-    Technology
-}
+import com.amar.modularnewsapp.ui.Screen
 
 private const val POWERED = "Powered By NewsApiOrg"
 
@@ -44,19 +31,17 @@ fun NavigationDrawer(
     backgroundColor: Color,
     context: Context
 ) {
-    Column(LayoutHeight.Fill) {
-        Container(height = 150.dp, modifier = LayoutWidth.Fill) {
-            SimpleImage(image = imageResource(R.drawable.news_background))
-        }
+    Column(modifier = Modifier.fillMaxHeight()) {
+        SimpleImage(id = R.drawable.news_background)
         Surface(
             color = backgroundColor,
-            modifier = LayoutFlexible(1f) + LayoutPadding(8.dp)
+            modifier = Modifier.weight(1f).padding(8.dp)
         ) {
-            VerticalScroller() {
+            ScrollableColumn() {
                 Column {
                     DrawerButton(
                         icon = R.drawable.ic_baseline_headline_24,
-                        label = NewsType.TopHeadline.name,
+                        label = Screen.TOP_HEADLINE.name,
                         isSelected = false,
                         action = {
                             onDrawerStateChange(DrawerState.Closed)
@@ -64,7 +49,7 @@ fun NavigationDrawer(
                     )
                     DrawerButton(
                         icon = R.drawable.ic_baseline_general_24,
-                        label = NewsType.General.name,
+                        label = Screen.GENERAL.name,
                         isSelected = false,
                         action = {
                             makeToast(context)
@@ -75,15 +60,15 @@ fun NavigationDrawer(
                     Text(
                         text = "Category",
                         style = TextStyle(
-                            color = (MaterialTheme.colors()).onSurface,
+                            color = (MaterialTheme.colors).onSurface,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.W500
                         ),
-                        modifier = LayoutPadding(8.dp)
+                        modifier = Modifier.padding(8.dp)
                     )
                     DrawerButton(
                         icon = R.drawable.ic_baseline_business_24,
-                        label = NewsType.Business.name,
+                        label = Screen.BUSINESS.name,
                         isSelected = false,
                         action = {
                             makeToast(context)
@@ -92,7 +77,7 @@ fun NavigationDrawer(
                     )
                     DrawerButton(
                         icon = R.drawable.ic_baseline_sport_24,
-                        label = NewsType.Sports.name,
+                        label = Screen.SPORTS.name,
                         isSelected = false,
                         action = {
                             makeToast(context)
@@ -101,7 +86,7 @@ fun NavigationDrawer(
                     )
                     DrawerButton(
                         icon = R.drawable.ic_baseline_entertainment_24,
-                        label = NewsType.Entertainment.name,
+                        label = Screen.ENTERTAINMENT.name,
                         isSelected = false,
                         action = {
                             makeToast(context)
@@ -110,7 +95,7 @@ fun NavigationDrawer(
                     )
                     DrawerButton(
                         icon = R.drawable.ic_baseline_health_24,
-                        label = NewsType.Health.name,
+                        label = Screen.HEALTH.name,
                         isSelected = false,
                         action = {
                             onDrawerStateChange(DrawerState.Closed)
@@ -119,7 +104,7 @@ fun NavigationDrawer(
 
                     DrawerButton(
                         icon = R.drawable.ic_baseline_science_24,
-                        label = NewsType.Science.name,
+                        label = Screen.SCIENCE.name,
                         isSelected = false,
                         action = {
                             makeToast(context)
@@ -128,7 +113,7 @@ fun NavigationDrawer(
                     )
                     DrawerButton(
                         icon = R.drawable.ic_baseline_technology_24,
-                        label = NewsType.Technology.name,
+                        label = Screen.TECHNOLOGY.name,
                         isSelected = false,
                         action = {
                             makeToast(context)
@@ -139,7 +124,7 @@ fun NavigationDrawer(
 
                     DrawerButton(
                         icon = R.drawable.ic_baseline_settings_24,
-                        label = "Setting",
+                        label = Screen.SETTING.name,
                         isSelected = false,
                         action = {
                             makeToast(context)
@@ -149,14 +134,14 @@ fun NavigationDrawer(
                 }
             }
         }
-        Column(LayoutPadding(8.dp)) {
-            Divider(color = (MaterialTheme.colors()).onSurface)
+        Column(modifier = Modifier.padding(8.dp)) {
+            Divider(color = (MaterialTheme.colors).onSurface)
             Text(
                 text = POWERED,
-                modifier = LayoutGravity.Center + LayoutPadding(8.dp),
-                style = (MaterialTheme.typography()).body2.copy(color = (MaterialTheme.colors()).onBackground)
+                modifier = Modifier.gravity(align = Alignment.CenterHorizontally).padding(8.dp),
+                style = (MaterialTheme.typography).body2.copy(color = (MaterialTheme.colors).onBackground)
             )
-            Divider(color = (MaterialTheme.colors()).onSurface)
+            Divider(color = (MaterialTheme.colors).onSurface)
         }
 
     }
@@ -171,40 +156,41 @@ private fun DrawerButton(
     action: () -> Unit
 ) {
     val textIconColor = if (isSelected) {
-        (MaterialTheme.colors()).surface
+        (MaterialTheme.colors).surface
     } else {
-        ((MaterialTheme.colors()).primary).copy(0.95f)
+        ((MaterialTheme.colors).primary).copy(0.95f)
     }
     val backgroundColor = if (isSelected) {
-        ((MaterialTheme.colors()).primary).copy(alpha = 0.80f)
+        ((MaterialTheme.colors).primary).copy(alpha = 0.80f)
     } else {
-        (MaterialTheme.colors()).surface
+        (MaterialTheme.colors).surface
     }
     Surface(
-        modifier = LayoutPadding(start = 8.dp, top = 8.dp, end = 8.dp),
+        modifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp),
         color = backgroundColor,
-        shape = RoundedCornerShape(4.dp)
+        shape = MaterialTheme.shapes.small
     ) {
-        Button(onClick = action,
+        Button(
+            onClick = action,
             backgroundColor = Color.Transparent,
-            shape = MaterialTheme.shapes().button,
-            paddings = EdgeInsets(
-                left = 16.dp,
-                right = 16.dp,
+            padding = InnerPadding(
+                start = 16.dp,
+                end = 16.dp,
                 top = 8.dp,
                 bottom = 8.dp
-            ).copy(left = 8.dp, right = 8.dp),
-            contentColor = MaterialTheme.colors().primary,
-            elevation = 0.dp){
-            Row(LayoutWidth.Fill) {
+            ).copy(start = 8.dp, end = 8.dp),
+            contentColor = MaterialTheme.colors.primary,
+            elevation = 0.dp
+        ) {
+            Row(Modifier.fillMaxWidth()) {
                 VectorImage(
                     id = icon,
                     tint = textIconColor
                 )
-                Spacer(LayoutWidth(16.dp))
+                Spacer(modifier = Modifier.width(16.dp))
                 Text(
                     text = label,
-                    style = ((MaterialTheme.typography()).body2).copy(
+                    style = ((MaterialTheme.typography).body2).copy(
                         color = textIconColor
                     )
                 )
@@ -216,41 +202,26 @@ private fun DrawerButton(
 @Composable
 private fun SimpleImage(@DrawableRes id: Int, tint: Color = Color.Transparent) {
     val image = imageResource(id)
-    Container(
-        width = 20.dp,
-        height = 20.dp
-    ) {
-        SimpleImage(image, tint)
-    }
-
+    Image(
+        asset = image,
+        colorFilter = ColorFilter(tint, blendMode = BlendMode.srcIn),
+        modifier = Modifier.preferredSize(20.dp)
+    )
 }
+
 private fun makeToast(context: Context, msg: String = "TBD...") {
     Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
 }
-// --- dev03
-//@Composable
-//private fun VectorImage(@DrawableRes id: Int, tint: Color = Color.Transparent) {
-//    val vector = vectorResource(id)
-//    WithDensity {
-//        Container(
-//            width = vector.defaultWidth.toDp(),
-//            height = vector.defaultHeight.toDp()
-//        ) {
-//            DrawVector(vector, tint)
-//        }
-//    }
-//}
 
 @Composable
 fun VectorImage(
-    modifier: Modifier = Modifier.None, @DrawableRes id: Int,
+    modifier: Modifier = Modifier, @DrawableRes id: Int,
     tint: Color = Color.Transparent
 ) {
     val vector = vectorResource(id)
-    Container(
-        modifier = modifier + LayoutSize(vector.defaultWidth, vector.defaultHeight)
-    ) {
-        DrawVector(vector, tint)
-    }
-
+    Image(
+        asset = vector,
+        colorFilter = ColorFilter(tint, blendMode = BlendMode.srcIn),
+        modifier = modifier.preferredSize(20.dp)
+    )
 }

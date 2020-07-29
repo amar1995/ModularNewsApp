@@ -11,12 +11,9 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.ui.core.*
 import androidx.ui.foundation.*
-import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
 import androidx.ui.layout.*
 import androidx.ui.material.*
-import androidx.ui.material.ripple.Ripple
-import androidx.ui.material.surface.Surface
 import androidx.ui.text.AnnotatedString
 import androidx.ui.text.SpanStyle
 import androidx.ui.text.TextStyle
@@ -25,7 +22,6 @@ import androidx.ui.unit.dp
 import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
 import com.amar.data.common.InternetConnection
 import com.amar.data.entities.NewsArticle
 import com.amar.data.repository.PageSize
@@ -34,10 +30,11 @@ import com.amar.data.worker.RefreshDataWorker
 import com.amar.modularnewsapp.R
 import com.amar.modularnewsapp.common.BaseViewModelFactory
 import com.amar.modularnewsapp.ui.article.ArticleTicket
-import com.amar.modularnewsapp.ui.common.Image
-import com.amar.modularnewsapp.ui.common.TopAppBar
+import com.amar.modularnewsapp.ui.common.AppBarType
+import com.amar.modularnewsapp.ui.common.UrlImage
 import com.amar.modularnewsapp.ui.navigationBar.NavigationDrawer
 import com.amar.modularnewsapp.ui.navigationBar.VectorImage
+import com.amar.modularnewsapp.ui.theme.DistillTheme
 import com.amar.modularnewsapp.viewmodel.ArticleModel
 
 private lateinit var newArticleModel: ArticleModel
@@ -61,7 +58,9 @@ class MainActivity : AppCompatActivity() {
 //        --------- uncomment to refresh on app start
 //        WorkManager.getInstance(applicationContext).enqueue(dataRefreshWork)
         setContent {
-            MainScreen(this)
+            DistillTheme {
+                MainScreen()
+            }
         }
     }
 
@@ -97,47 +96,50 @@ class MainActivity : AppCompatActivity() {
 }
 
 @Composable
-fun MainScreen(activity: AppCompatActivity) {
-    val dark = isSystemInDarkTheme()
-    MaterialTheme(
-        colors = if (dark) darkThemeColors else lightThemeColors,
-        typography = themeTypography
+fun MainScreen() {
+    val context = ContextAmbient.current
+    val (drawerState, onStateChange) = state { DrawerState.Closed }
+    val (bottomDrawerState, bottomOnStateChange) = state { BottomDrawerState.Closed }
+    val (detailArticleState: NewsArticle?, onDetailArticleChange: (NewsArticle?) -> Unit) = state<NewsArticle?> { null }
+    val scaffoldState = ScaffoldState(isDrawerGesturesEnabled = false)
+    Scaffold(
+        topBar = {
+            AppBarType(
+                title = null,
+                navigationIcon = {
+
+                },
+                actions = {
+
+                }
+            )
+        },
+        scaffoldState = scaffoldState,
+        drawerContent = {
+            NavigationDrawer(
+                onDrawerStateChange = { scaffoldState.drawerState = it },
+                backgroundColor = (MaterialTheme.colors).surface,
+                context = context
+            )
+        }
     ) {
-        val (drawerState, onStateChange) = state { DrawerState.Closed }
-        val (bottomDrawerState, bottomOnStateChange) = state { DrawerState.Closed }
-        val (detailArticleState: NewsArticle?, onDetailArticleChange: (NewsArticle?) -> Unit) = state<NewsArticle?> { null }
-        BottomDrawerLayout(drawerState = bottomDrawerState,
+        BottomDrawerLayout(
+            drawerState = bottomDrawerState,
             onStateChange = {},
             gesturesEnabled = true,
             drawerContent = {
-                //            Text("Hello to news lover")
                 showNewArticleInDetail(
                     article = detailArticleState,
                     onClick = {
-                        bottomOnStateChange(DrawerState.Closed)
+                        bottomOnStateChange(BottomDrawerState.Closed)
                         onDetailArticleChange(null)
-                    },
-                    activty = activity)
-            }){
-            ModalDrawerLayout(
-                drawerState = drawerState,
+                    }
+                )
+            }) {
+            AppContent(
                 onStateChange = onStateChange,
-                gesturesEnabled = false,
-                drawerContent = {
-                    NavigationDrawer(
-                        onDrawerStateChange = onStateChange,
-                        backgroundColor = (MaterialTheme.colors()).surface,
-                        context = activity.applicationContext
-                    )
-                },
-                bodyContent = {
-                    AppContent(
-                        onStateChange = onStateChange,
-                        bottomOnStateChange = bottomOnStateChange,
-                        onDetailArticleChange = onDetailArticleChange,
-                        activty = activity
-                    )
-                }
+                bottomOnStateChange = bottomOnStateChange,
+                onDetailArticleChange = onDetailArticleChange
             )
         }
     }
@@ -147,36 +149,25 @@ fun MainScreen(activity: AppCompatActivity) {
 @Composable
 fun AppContent(
     onStateChange: (DrawerState) -> Unit,
-    bottomOnStateChange: (DrawerState) -> Unit,
-    onDetailArticleChange: (NewsArticle?) -> Unit,
-    activty: AppCompatActivity
+    bottomOnStateChange: (BottomDrawerState) -> Unit,
+    onDetailArticleChange: (NewsArticle?) -> Unit
 ) {
-    Column() {
-        Surface(color = (MaterialTheme.colors()).surface) {
-            Column {
-                TopAppBar(
-                    onDrawerStateChange = onStateChange,
-                    backgroundColor = (MaterialTheme.colors()).background,
-                    onSearchClick = {
-                        Toast.makeText(activty.applicationContext, "TBD...", Toast.LENGTH_SHORT).show()
-                    }
-                )
-                CustomTab(bottomOnStateChange, onDetailArticleChange)
-            }
+    Surface(color = (MaterialTheme.colors).surface) {
+        Column {
+            CustomTab(bottomOnStateChange, onDetailArticleChange)
         }
-
     }
 }
 
 
 @Composable
 fun CustomTab(
-    bottomOnStateChange: (DrawerState) -> Unit,
+    bottomOnStateChange: (BottomDrawerState) -> Unit,
     onDetailArticleChange: (NewsArticle?) -> Unit
 ) {
     var internationalState = observer(newArticleModel.articleData2)
     var page = observer(newArticleModel.pageNo)
-    Surface(color = (MaterialTheme.colors()).surface, modifier = LayoutSize.Fill) {
+    Surface(color = (MaterialTheme.colors).surface, modifier = Modifier.fillMaxWidth()) {
         if (internationalState == null) {
             showLoading()
         } else {
@@ -193,18 +184,19 @@ fun CustomTab(
 
                         Observe {
                             onCommit(scrollerPosition.isAtEndOfList) {
-                                println("Is commit entered")
                                 if (scrollerPosition.isAtEndOfList)
                                     newArticleModel.updatePageNo(++PageSize.topHeadlineInternationalPageNo)
                             }
                         }
-                        VerticalScroller(scrollerPosition = scrollerPosition) {
-                            Column(modifier = LayoutSize.Fill) {
+                        ScrollableColumn() {
+                            Column(modifier = Modifier.fillMaxWidth()) {
                                 data.forEach {
-                                    ShowArticle(article = it, onClick = {
-                                        onDetailArticleChange(it)
-                                        bottomOnStateChange(DrawerState.Opened)
-                                    })
+                                    key(it) {
+                                        ShowArticle(article = it, onClick = {
+                                            onDetailArticleChange(it)
+                                            bottomOnStateChange(BottomDrawerState.Opened)
+                                        })
+                                    }
                                 }
                             }
                         }
@@ -219,7 +211,7 @@ fun CustomTab(
                     }
                 }
                 Status.UNAUTHORIZED -> {
-                    Container(alignment = Alignment.Center) {
+                    Box() {
                         Text("Please add the news.org token")
                     }
                 }
@@ -229,128 +221,140 @@ fun CustomTab(
 }
 
 @Composable
+private fun Observe(body: @Composable() () -> Unit) = body
+
+@Composable
 private fun ShowArticle(
-    @Pivotal article: NewsArticle,
+    article: NewsArticle,
     onClick: () -> Unit
 ) {
-    Ripple(bounded = true) {
-        Clickable(onClick = onClick) {
-            ArticleTicket(
-                backgroundColor = (MaterialTheme.colors()).background,
-                article = article
-            )
-        }
-    }
+    ArticleTicket(
+        backgroundColor = (MaterialTheme.colors).background,
+        article = article,
+        modifier = Modifier.clickable(onClick = onClick)
+    )
 }
 
 @Composable
-private fun noContentMore(modifier: Modifier = Modifier.None) {
-    Container(modifier = modifier) {
-        Text("No more to show....")
-    }
+private fun noContentMore(modifier: Modifier = Modifier) {
+    Text("No more to show....")
 }
 
 @Composable
 private fun showLoading(
-    color: Color = (MaterialTheme.colors()).primary,
-    modifier: Modifier = Modifier.None
+    color: Color = MaterialTheme.colors.secondaryVariant,
+    modifier: Modifier = Modifier
 ) {
-    Container(alignment = Alignment.Center, modifier = modifier) {
-        Text("Loading ..... ")
-    }
-}
-
-@Composable
-private fun showError(msg: String) {
-    Container(alignment = Alignment.Center) {
-        Text(
-            msg,
-            style = TextStyle(Color.Red)
+    Box(modifier = modifier.fillMaxSize(), gravity = ContentGravity.Center) {
+        CircularProgressIndicator(
+            color = color,
+            modifier = Modifier.wrapContentWidth(Alignment.CenterHorizontally)
         )
     }
 }
 
 @Composable
-private fun showNewArticleInDetail(article: NewsArticle?, onClick: () -> Unit, activty: AppCompatActivity) {
-    val typography = MaterialTheme.typography()
+private fun showError(msg: String) {
+    Text(
+        msg,
+        style = TextStyle(Color.Red)
+    )
+}
+
+@Composable
+private fun showNewArticleInDetail(
+    article: NewsArticle?,
+    onClick: () -> Unit
+) {
+    val context = ContextAmbient.current
+    val typography = MaterialTheme.typography
     Surface(
-        color = (MaterialTheme.colors()).surface,
-        modifier = LayoutPadding(16.dp)
+        color = MaterialTheme.colors.surface,
+        modifier = Modifier.padding(16.dp)
     ) {
         if (article != null) {
-            Column(modifier = LayoutSize.Fill + LayoutPadding(8.dp)) {
-                Clickable(onClick) {
-                    Container(
-                        LayoutWidth.Fill + LayoutPadding(4.dp),
-                        alignment = Alignment.TopStart
-                    ) {
-                        VectorImage(
-                            id = R.drawable.ic_baseline_close_24,
-                            tint = (MaterialTheme.colors()).onSurface
-                        )
-                    }
+            Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(4.dp).clickable(onClick = onClick)
+                ) {
+                    VectorImage(
+                        id = R.drawable.ic_baseline_close_24,
+                        tint = (MaterialTheme.colors).onSurface
+                    )
                 }
-                Spacer(LayoutHeight(8.dp))
+                Spacer(Modifier.height(8.dp))
                 article.urlToImage?.let { imageUrl ->
-                    Container(modifier = LayoutWidth.Fill, height = 200.dp) {
-                        Clip(shape = RoundedCornerShape(4.dp)) {
-                            Image(url = imageUrl, width = 100.dp, height = 200.dp)
-                        }
+                    Box(
+                        modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small)
+                            .preferredHeight(100.dp)
+                    ) {
+                        UrlImage(url = imageUrl, width = 100.dp, height = 100.dp)
                     }
                 }
-                Spacer(LayoutSize(16.dp))
-                val emphasisLevels = MaterialTheme.emphasisLevels()
+                Spacer(modifier = Modifier.height(16.dp))
+                val emphasisLevels = EmphasisAmbient.current
                 ProvideEmphasis(emphasisLevels.high) {
                     Text(
                         text = if (article.title == null) "Title not given" else article.title!!,
-                        style = typography.h6.copy(color = (MaterialTheme.colors()).onSurface)
+                        style = typography.h6.copy(color = (MaterialTheme.colors).onSurface)
                     )
                 }
                 ProvideEmphasis(emphasisLevels.high) {
                     Text(
                         text = if (article.author == null) "Unknow author" else article.author!!,
-                        style = typography.body2.copy(color = (MaterialTheme.colors()).onSurface)
+                        style = typography.body2.copy(color = (MaterialTheme.colors).onSurface)
                     )
                 }
                 ProvideEmphasis(emphasisLevels.medium) {
                     Text(
                         text = article.publishedTime!!,
-                        style = typography.body2.copy(color = (MaterialTheme.colors()).onSurface)
+                        style = typography.body2.copy(color = (MaterialTheme.colors).onSurface)
                     )
                 }
-                Spacer(LayoutHeight(10.dp))
+                Spacer(Modifier.height(10.dp))
                 Text(
-                    text = if(article.description == null ) "" else article.description!!,
-                    style = typography.body1.copy(color = (MaterialTheme.colors()).onSurface)
+                    text = if (article.description == null) "" else article.description!!,
+                    style = typography.body1.copy(color = (MaterialTheme.colors).onSurface)
                 )
-                Spacer(LayoutHeight(20.dp))
-
+                Spacer(Modifier.height(20.dp))
                 Text(
-                    modifier = LayoutPadding(8.dp),
-                    text = if(article.content == null) "" else article.content!!,
-                    style = typography.body2.copy(color = (MaterialTheme.colors()).onSurface.copy(alpha = 0.7f))
-                )
-                Clickable(onClick = {
-                    if(article.url == null) {
-                        Toast.makeText(activty.applicationContext, "Unable to show", Toast.LENGTH_SHORT).show()
-                    } else {
-                        activty.startActivity(Intent(Intent.ACTION_VIEW , Uri.parse(article.url)))
-                    }
-                }) {
-                    Text(
-                        modifier = LayoutPadding(8.dp),
-                        text = AnnotatedString(
-                            text = "see more...",
-                            spanStyle = SpanStyle(
-                                color = Color.Blue,
-                                textDecoration = TextDecoration.Underline
-                            )
+                    modifier = Modifier.padding(8.dp),
+                    text = if (article.content == null) "" else article.content!!,
+                    style = typography.body2.copy(
+                        color = (MaterialTheme.colors).onSurface.copy(
+                            alpha = 0.7f
                         )
                     )
-                }
+                )
+                Text(
+                    modifier = Modifier.padding(8.dp).clickable(onClick = {
+                        if (article.url == null) {
+                            Toast.makeText(
+                                context,
+                                "Unable to show",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            context.startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse(article.url)
+                                )
+                            )
+                        }
+                    }),
+                    text = AnnotatedString(
+                        text = "see more...",
+                        spanStyle = SpanStyle(
+                            color = Color.Blue,
+                            textDecoration = TextDecoration.Underline
+                        )
+                    )
+                )
+
             }
         } else {
-            Column(LayoutSize.Fill) {
+            Column(modifier = Modifier.fillMaxSize()) {
                 Text("Unknow Error !!!!")
             }
             onClick()

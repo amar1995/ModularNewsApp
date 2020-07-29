@@ -1,39 +1,43 @@
 package com.amar.modularnewsapp.ui.article
 
 import androidx.compose.Composable
-import androidx.ui.core.Clip
-import androidx.ui.core.Text
-import androidx.ui.foundation.shape.corner.RoundedCornerShape
+import androidx.ui.core.Modifier
+import androidx.ui.core.clip
+import androidx.ui.foundation.Box
+import androidx.ui.foundation.Text
 import androidx.ui.graphics.Color
 import androidx.ui.layout.*
+import androidx.ui.material.EmphasisAmbient
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.ProvideEmphasis
-import androidx.ui.material.surface.Surface
+import androidx.ui.material.Surface
 import androidx.ui.unit.dp
 import com.amar.data.entities.NewsArticle
-import com.amar.modularnewsapp.ui.common.Image
+import com.amar.modularnewsapp.ui.common.UrlImage
 
 @Composable
 fun ArticleTicket(
     backgroundColor: Color,
-    article: NewsArticle
+    article: NewsArticle,
+    modifier: Modifier = Modifier
 ) {
-    val typography = MaterialTheme.typography()
+    val typography = MaterialTheme.typography
     Surface(
         color = backgroundColor,
-        modifier = LayoutPadding(16.dp),
-        shape = RoundedCornerShape(10.dp)
+        modifier = modifier.padding(16.dp),
+        shape = MaterialTheme.shapes.large
     ) {
-        Column(modifier = LayoutWidth.Fill + LayoutPadding(8.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
             article.urlToImage?.let { imageUrl ->
-                Container(modifier = LayoutWidth.Fill, height = 100.dp) {
-                    Clip(shape = RoundedCornerShape(4.dp)) {
-                        Image(url = imageUrl, width = 100.dp, height = 100.dp)
-                    }
+                Box(
+                    modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small)
+                        .preferredHeight(100.dp)
+                ) {
+                    UrlImage(url = imageUrl, width = 100.dp, height = 100.dp)
                 }
             }
-            Spacer(LayoutSize(16.dp))
-            val emphasisLevels = MaterialTheme.emphasisLevels()
+            Spacer(modifier = Modifier.height(16.dp))
+            val emphasisLevels = EmphasisAmbient.current
             ProvideEmphasis(emphasisLevels.high) {
                 Text(
                     text = if (article.title == null) "Title not given" else article.title!!,
