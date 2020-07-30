@@ -14,6 +14,8 @@ import androidx.ui.foundation.*
 import androidx.ui.graphics.Color
 import androidx.ui.layout.*
 import androidx.ui.material.*
+import androidx.ui.material.icons.Icons
+import androidx.ui.material.icons.filled.Menu
 import androidx.ui.text.AnnotatedString
 import androidx.ui.text.SpanStyle
 import androidx.ui.text.TextStyle
@@ -38,7 +40,6 @@ import com.amar.modularnewsapp.ui.theme.DistillTheme
 import com.amar.modularnewsapp.viewmodel.ArticleModel
 
 private lateinit var newArticleModel: ArticleModel
-val ScrollerPosition.isAtEndOfList: Boolean get() = value >= maxPosition
 
 class MainActivity : AppCompatActivity() {
 
@@ -107,7 +108,9 @@ fun MainScreen() {
             AppBarType(
                 title = null,
                 navigationIcon = {
-
+                    IconButton(onClick = { scaffoldState.drawerState = DrawerState.Opened }) {
+                        Icon(Icons.Filled.Menu)
+                    }
                 },
                 actions = {
 
@@ -167,7 +170,7 @@ fun CustomTab(
 ) {
     var internationalState = observer(newArticleModel.articleData2)
     var page = observer(newArticleModel.pageNo)
-    Surface(color = (MaterialTheme.colors).surface, modifier = Modifier.fillMaxWidth()) {
+    Surface(color = MaterialTheme.colors.surface, modifier = Modifier.fillMaxWidth()) {
         if (internationalState == null) {
             showLoading()
         } else {
@@ -180,13 +183,8 @@ fun CustomTab(
                     if (data.isNullOrEmpty()) {
                         noContentMore()
                     } else {
-                        val scrollerPosition: ScrollerPosition = ScrollerPosition(0f)
 
                         Observe {
-                            onCommit(scrollerPosition.isAtEndOfList) {
-                                if (scrollerPosition.isAtEndOfList)
-                                    newArticleModel.updatePageNo(++PageSize.topHeadlineInternationalPageNo)
-                            }
                         }
                         ScrollableColumn() {
                             Column(modifier = Modifier.fillMaxWidth()) {
