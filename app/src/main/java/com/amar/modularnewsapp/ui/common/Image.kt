@@ -79,7 +79,7 @@ fun UrlImage(url: String, width: Dp, height: Dp) {
         Image(
             asset = image!!,
             modifier = Modifier.preferredSize(height = height, width = width),
-            contentScale = ContentScale.Fit
+            contentScale = ContentScale.FillWidth
         )
     } else if (drawable != null) {
         androidx.ui.foundation.Canvas(

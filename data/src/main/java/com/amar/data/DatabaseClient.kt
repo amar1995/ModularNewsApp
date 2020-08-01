@@ -16,7 +16,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 
-@Database(entities = arrayOf(NewsArticle::class), version = VERSION)
+@Database(entities = arrayOf(NewsArticle::class), version = VERSION, exportSchema = false)
 @TypeConverters(DateConverter::class)
 abstract class DatabaseClient : RoomDatabase() {
 
@@ -40,7 +40,7 @@ abstract class DatabaseClient : RoomDatabase() {
                         context.applicationContext,
                         DatabaseClient::class.java,
                         DATABASE_NAME
-                    ).build()
+                    ).fallbackToDestructiveMigration().build()
                 }
             }
             return databaseInstance

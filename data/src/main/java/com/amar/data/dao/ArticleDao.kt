@@ -17,21 +17,16 @@ interface ArticleDao {
     fun getArticles(): LiveData<List<NewsArticle>>
 
 
-    @Query("Select * from $TABLE_NAME where category = :category")
+    @Query("Select * from $TABLE_NAME where category = :category order by $TABLE_NAME.time desc")
     fun getCategoryArticles(category: String): LiveData<List<NewsArticle>>
-
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertArticles(article: List<NewsArticle>): List<Long>
 
-
     @Query("Delete from $TABLE_NAME")
-    suspend fun deleteAllArticle()
-
-    @Query("Delete from $TABLE_NAME where category = \"all\" ")
-    suspend fun deleteArticles()
+    suspend fun deleteAllArticles()
 
     @Query("Delete from $TABLE_NAME where category = :category")
-    suspend fun deleteCategoryArticles(category: String)
+    suspend fun deleteArticlesByCategory(category: String)
 
 }

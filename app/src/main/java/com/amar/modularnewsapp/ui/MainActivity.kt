@@ -9,12 +9,17 @@ import androidx.compose.*
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.ui.core.*
+import androidx.ui.core.Alignment
+import androidx.ui.core.ContextAmbient
+import androidx.ui.core.Modifier
+import androidx.ui.core.setContent
 import androidx.ui.foundation.*
 import androidx.ui.graphics.Color
 import androidx.ui.layout.*
+import androidx.ui.livedata.observeAsState
 import androidx.ui.material.*
 import androidx.ui.material.icons.Icons
+import androidx.ui.material.icons.filled.Close
 import androidx.ui.material.icons.filled.Menu
 import androidx.ui.text.AnnotatedString
 import androidx.ui.text.SpanStyle
@@ -24,24 +29,27 @@ import androidx.ui.unit.dp
 import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
-import com.amar.data.common.InternetConnection
 import com.amar.data.entities.NewsArticle
-import com.amar.data.repository.PageSize
-import com.amar.data.vo.Status
 import com.amar.data.worker.RefreshDataWorker
-import com.amar.modularnewsapp.R
 import com.amar.modularnewsapp.common.BaseViewModelFactory
-import com.amar.modularnewsapp.ui.article.ArticleTicket
+import com.amar.modularnewsapp.ui.article.ShowArticleView
 import com.amar.modularnewsapp.ui.common.AppBarType
 import com.amar.modularnewsapp.ui.common.UrlImage
 import com.amar.modularnewsapp.ui.navigationBar.NavigationDrawer
-import com.amar.modularnewsapp.ui.navigationBar.VectorImage
 import com.amar.modularnewsapp.ui.theme.DistillTheme
+import com.amar.modularnewsapp.ui.util.NavigationStack
+import com.amar.modularnewsapp.ui.util.Route
+import com.amar.modularnewsapp.ui.util.fadeInTransition
+import com.amar.modularnewsapp.ui.util.fadeOutTransition
 import com.amar.modularnewsapp.viewmodel.ArticleModel
+import com.amar.modularnewsapp.viewmodel.ArticleState
+import java.text.SimpleDateFormat
+import java.util.*
 
 private lateinit var newArticleModel: ArticleModel
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var navigationStack: NavigationStack<MainScreen>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +58,7 @@ class MainActivity : AppCompatActivity() {
                 this,
                 BaseViewModelFactory { ArticleModel(application = this.application) })
                 .get(ArticleModel::class.java)
+
         println("Activty A onCreate")
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -59,8 +68,10 @@ class MainActivity : AppCompatActivity() {
 //        --------- uncomment to refresh on app start
 //        WorkManager.getInstance(applicationContext).enqueue(dataRefreshWork)
         setContent {
+            navigationStack = NavigationStack(MainScreen.General)
+
             DistillTheme {
-                MainScreen()
+                NewsApp(navigationStack)
             }
         }
     }
@@ -94,14 +105,38 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         // on Destroy clear database
     }
+
+    override fun onBackPressed() {
+        if (navigationStack.back() == null) {
+            super.onBackPressed()
+        }
+    }
 }
 
 @Composable
-fun MainScreen() {
+fun NewsApp(navigationStack: NavigationStack<MainScreen>) {
+    Route(navigationStack.getTransition()) { screen: MainScreen ->
+        when (screen) {
+            is MainScreen.Search -> {
+
+            }
+            is MainScreen.Detail_view -> {
+                showNewArticleInDetail(article = screen.article, navigationStack = navigationStack)
+            }
+            else -> {
+                AppContent(navigationStack = navigationStack)
+            }
+        }
+    }
+
+}
+
+
+@Composable
+fun AppContent(
+    navigationStack: NavigationStack<MainScreen>
+) {
     val context = ContextAmbient.current
-    val (drawerState, onStateChange) = state { DrawerState.Closed }
-    val (bottomDrawerState, bottomOnStateChange) = state { BottomDrawerState.Closed }
-    val (detailArticleState: NewsArticle?, onDetailArticleChange: (NewsArticle?) -> Unit) = state<NewsArticle?> { null }
     val scaffoldState = ScaffoldState(isDrawerGesturesEnabled = false)
     Scaffold(
         topBar = {
@@ -113,7 +148,18 @@ fun MainScreen() {
                     }
                 },
                 actions = {
-
+                    Text(
+                        text = "Search News",
+                        modifier = Modifier.weight(1f) + Modifier.clickable(
+                            onClick = {
+                                navigationStack.next(
+                                    next = MainScreen.Search,
+                                    enterTransition = fadeInTransition,
+                                    exitTransition = fadeOutTransition
+                                )
+                            }),
+                        style = MaterialTheme.typography.body1
+                    )
                 }
             )
         },
@@ -122,120 +168,59 @@ fun MainScreen() {
             NavigationDrawer(
                 onDrawerStateChange = { scaffoldState.drawerState = it },
                 backgroundColor = (MaterialTheme.colors).surface,
-                context = context
+                navigationStack = navigationStack
             )
         }
     ) {
-        BottomDrawerLayout(
-            drawerState = bottomDrawerState,
-            onStateChange = {},
-            gesturesEnabled = true,
-            drawerContent = {
-                showNewArticleInDetail(
-                    article = detailArticleState,
-                    onClick = {
-                        bottomOnStateChange(BottomDrawerState.Closed)
-                        onDetailArticleChange(null)
+        when (navigationStack.current()) {
+            MainScreen.Business -> {
+                Surface(color = (MaterialTheme.colors).surface) {
+                    Column {
+                        CustomTab(navigationStack = navigationStack)
                     }
-                )
-            }) {
-            AppContent(
-                onStateChange = onStateChange,
-                bottomOnStateChange = bottomOnStateChange,
-                onDetailArticleChange = onDetailArticleChange
-            )
+                }
+            }
+            MainScreen.General -> {
+                Surface(color = (MaterialTheme.colors).surface) {
+                    Column {
+                        CustomTab(navigationStack = navigationStack)
+                    }
+                }
+            }
         }
-    }
-}
 
-
-@Composable
-fun AppContent(
-    onStateChange: (DrawerState) -> Unit,
-    bottomOnStateChange: (BottomDrawerState) -> Unit,
-    onDetailArticleChange: (NewsArticle?) -> Unit
-) {
-    Surface(color = (MaterialTheme.colors).surface) {
-        Column {
-            CustomTab(bottomOnStateChange, onDetailArticleChange)
-        }
     }
 }
 
 
 @Composable
 fun CustomTab(
-    bottomOnStateChange: (BottomDrawerState) -> Unit,
-    onDetailArticleChange: (NewsArticle?) -> Unit
+    navigationStack: NavigationStack<MainScreen>
 ) {
-    var internationalState = observer(newArticleModel.articleData2)
-    var page = observer(newArticleModel.pageNo)
-    Surface(color = MaterialTheme.colors.surface, modifier = Modifier.fillMaxWidth()) {
+    val internationalState by newArticleModel.articles.observeAsState()
+    Surface(color = MaterialTheme.colors.background, modifier = Modifier.fillMaxWidth()) {
         if (internationalState == null) {
             showLoading()
         } else {
-            when (internationalState!!.status) {
-                Status.LOADING -> {
+            when (internationalState!!.articleState) {
+                is ArticleState.Loading -> {
                     showLoading()
                 }
-                Status.SUCCESS -> {
-                    val data = internationalState.data
-                    if (data.isNullOrEmpty()) {
-                        noContentMore()
-                    } else {
-
-                        Observe {
+                is ArticleState.Success -> {
+                    ShowArticleView(
+                        navigationStack = navigationStack,
+                        articles = internationalState!!,
+                        endOfPage = {
+                            newArticleModel.endOfPage(Screen.GENERAL)
                         }
-                        ScrollableColumn() {
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                data.forEach {
-                                    key(it) {
-                                        ShowArticle(article = it, onClick = {
-                                            onDetailArticleChange(it)
-                                            bottomOnStateChange(BottomDrawerState.Opened)
-                                        })
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    )
                 }
-                Status.ERROR -> {
-                    val context = ContextAmbient.current
-                    if (!InternetConnection.isAvailable(context = context)) {
-                        showError(msg = "No Internet")
-                    } else {
-                        showError(msg = if (internationalState.message == null) "Unknow Error!!!" else internationalState.message!!)
-                    }
-                }
-                Status.UNAUTHORIZED -> {
-                    Box() {
-                        Text("Please add the news.org token")
-                    }
+                is ArticleState.Error -> {
+                    // error view
                 }
             }
         }
     }
-}
-
-@Composable
-private fun Observe(body: @Composable() () -> Unit) = body
-
-@Composable
-private fun ShowArticle(
-    article: NewsArticle,
-    onClick: () -> Unit
-) {
-    ArticleTicket(
-        backgroundColor = (MaterialTheme.colors).background,
-        article = article,
-        modifier = Modifier.clickable(onClick = onClick)
-    )
-}
-
-@Composable
-private fun noContentMore(modifier: Modifier = Modifier) {
-    Text("No more to show....")
 }
 
 @Composable
@@ -262,33 +247,31 @@ private fun showError(msg: String) {
 @Composable
 private fun showNewArticleInDetail(
     article: NewsArticle?,
-    onClick: () -> Unit
+    navigationStack: NavigationStack<MainScreen>
 ) {
     val context = ContextAmbient.current
     val typography = MaterialTheme.typography
     Surface(
-        color = MaterialTheme.colors.surface,
-        modifier = Modifier.padding(16.dp)
+        color = MaterialTheme.colors.surface
     ) {
         if (article != null) {
             Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(4.dp).clickable(onClick = onClick)
-                ) {
-                    VectorImage(
-                        id = R.drawable.ic_baseline_close_24,
-                        tint = (MaterialTheme.colors).onSurface
-                    )
+                IconButton(onClick = {
+                    navigationStack.back()
+                }, modifier = Modifier) {
+                    Icon(asset = Icons.Filled.Close, tint = MaterialTheme.colors.onSurface)
                 }
-                Spacer(Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
                 article.urlToImage?.let { imageUrl ->
-                    Box(
-                        modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small)
-                            .preferredHeight(100.dp)
+                    Surface(
+                        modifier = Modifier.fillMaxWidth()
+                                + Modifier.preferredHeight(164.dp),
+                        shape = MaterialTheme.shapes.medium
                     ) {
                         UrlImage(url = imageUrl, width = 100.dp, height = 100.dp)
                     }
                 }
+
                 Spacer(modifier = Modifier.height(16.dp))
                 val emphasisLevels = EmphasisAmbient.current
                 ProvideEmphasis(emphasisLevels.high) {
@@ -305,7 +288,7 @@ private fun showNewArticleInDetail(
                 }
                 ProvideEmphasis(emphasisLevels.medium) {
                     Text(
-                        text = article.publishedTime!!,
+                        text = dateToString(article.publishedTime!!),
                         style = typography.body2.copy(color = (MaterialTheme.colors).onSurface)
                     )
                 }
@@ -355,9 +338,14 @@ private fun showNewArticleInDetail(
             Column(modifier = Modifier.fillMaxSize()) {
                 Text("Unknow Error !!!!")
             }
-            onClick()
+//            onClick()
         }
     }
+}
+
+fun dateToString(value: Date): String {
+    val ft = SimpleDateFormat("E yyyy.MM.dd 'at' hh:mm:ss a zzz")
+    return ft.format(value)
 }
 
 @Composable

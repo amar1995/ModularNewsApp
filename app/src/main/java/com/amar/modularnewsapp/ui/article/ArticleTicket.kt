@@ -5,6 +5,8 @@ import androidx.ui.core.Modifier
 import androidx.ui.core.clip
 import androidx.ui.foundation.Box
 import androidx.ui.foundation.Text
+import androidx.ui.foundation.drawBackground
+import androidx.ui.foundation.isSystemInDarkTheme
 import androidx.ui.graphics.Color
 import androidx.ui.layout.*
 import androidx.ui.material.EmphasisAmbient
@@ -14,26 +16,27 @@ import androidx.ui.material.Surface
 import androidx.ui.unit.dp
 import com.amar.data.entities.NewsArticle
 import com.amar.modularnewsapp.ui.common.UrlImage
+import com.amar.modularnewsapp.ui.dateToString
 
 @Composable
 fun ArticleTicket(
-    backgroundColor: Color,
     article: NewsArticle,
     modifier: Modifier = Modifier
 ) {
     val typography = MaterialTheme.typography
     Surface(
-        color = backgroundColor,
+        color = if(isSystemInDarkTheme()) Color(0xff212121) else Color.LightGray,
         modifier = modifier.padding(16.dp),
         shape = MaterialTheme.shapes.large
     ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().plus(Modifier.padding(8.dp))) {
             article.urlToImage?.let { imageUrl ->
-                Box(
-                    modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small)
-                        .preferredHeight(100.dp)
+                Surface(
+                    modifier = Modifier.fillMaxWidth()
+                     + Modifier.preferredHeight(124.dp),
+                    shape = MaterialTheme.shapes.medium
                 ) {
-                    UrlImage(url = imageUrl, width = 100.dp, height = 100.dp)
+                    UrlImage(url = imageUrl, height = 100.dp, width = 100.dp)
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -52,7 +55,7 @@ fun ArticleTicket(
             }
             ProvideEmphasis(emphasisLevels.medium) {
                 Text(
-                    text = article.publishedTime!!,
+                    text = dateToString(article.publishedTime!!),
                     style = typography.body2
                 )
             }

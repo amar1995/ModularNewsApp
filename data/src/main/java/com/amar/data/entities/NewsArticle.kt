@@ -6,6 +6,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.amar.data.common.ConstantConfig.TABLE_NAME
 import com.google.gson.annotations.SerializedName
+import java.util.*
 
 data class Source(
     @ColumnInfo(name = Column.sourceId)
@@ -28,6 +29,7 @@ data class Source(
         const val time = "time"
         const val content = "content"
         const val category = "category"
+        const val country = "country"
     }
 
     object GsonConst {
@@ -76,7 +78,7 @@ data class NewsArticle(
 
     @ColumnInfo(name = Source.Column.time)
     @SerializedName(Source.GsonConst.time)
-    val publishedTime: String?,
+    val publishedTime: Date = Date(),
 
     @ColumnInfo(name = Source.Column.content)
     @SerializedName(Source.GsonConst.content)

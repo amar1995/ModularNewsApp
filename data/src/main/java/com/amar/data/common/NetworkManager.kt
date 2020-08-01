@@ -9,16 +9,22 @@ import com.amar.data.vo.Status
 import kotlinx.coroutines.*
 import retrofit2.Response
 
+
 abstract class NetworkManager<ResultType, RequestType> {
     private val result = MediatorLiveData<Resource<ResultType>>()
 
     init {
         result.value = Resource.loading(null)
-        if(!makeOnlineRequest()) {
+        if (isOnlineRequest()) {
+            // when have to make online request to
+            val dbSource = AbsentLiveData.create<ResultType>()
+            fetchFromNetwork(dbSource)
+        } else {
+            @Suppress("LeakingThis")
             val dbSource = loadFromDb()
             result.addSource(dbSource) { data ->
                 result.removeSource(dbSource)
-                if (shouldFetch(data)) {
+                if (shouldFetch(data) && isInternetAvailable()) {
                     fetchFromNetwork(dbSource)
                 } else {
                     result.addSource(dbSource) { newData ->
@@ -26,10 +32,6 @@ abstract class NetworkManager<ResultType, RequestType> {
                     }
                 }
             }
-        } else {
-            // only online request for search system ....
-            val dbSource = AbsentLiveData.create<ResultType>()
-            fetchFromNetwork(dbSource)
         }
     }
 
@@ -44,33 +46,35 @@ abstract class NetworkManager<ResultType, RequestType> {
         result.addSource(dbSource) {
             setValue(Resource.loading(it))
         }
-
         result.addSource(apiResponse) { response: ApiResponse<RequestType> ->
             result.removeSource(apiResponse)
             result.removeSource(dbSource)
             when (response) {
                 is ApiSuccessResponse -> {
-                     runBlocking {
+                    runBlocking {
                         withContext(Dispatchers.IO) {
                             saveCallResult(processResponse(response))
                         }
-                         result.addSource(loadFromDb()) {
-                             setValue(Resource.success(Status.SUCCESS, it, null))
-                         }
+                    }
+                    if (isOnlineRequest()) {
+                        result.addSource(AbsentLiveData.createWithResource(response.body)) {
+                            setValue(Resource.success(data = it as ResultType))
+                        }
+                    } else {
+                        result.addSource(loadFromDb()) {
+                            setValue(Resource.success(data = it))
+                        }
                     }
                 }
                 is ApiEmptyResponse -> {
                     result.addSource(loadFromDb()) { newData ->
-                        setValue(Resource.success(Status.SUCCESS, newData))
+                        setValue(Resource.success(data = newData))
                     }
                 }
                 is ApiErrorResponse -> {
+                    onFetchFailed()
                     result.addSource(dbSource) {
-                        if(it == null) {
-                            setValue(Resource.error(response.errorMessage, it))
-                        } else {
-                            setValue(Resource.success(data =  it))
-                        }
+                        setValue(Resource.error(response.errorMessage, it))
                     }
                 }
                 is UnAuthorizedResponse -> {
@@ -83,6 +87,7 @@ abstract class NetworkManager<ResultType, RequestType> {
         }
     }
 
+    // retry after internet is back
     protected open fun onFetchFailed() {}
 
     fun asLiveData() = result as LiveData<Resource<ResultType>>
@@ -94,8 +99,11 @@ abstract class NetworkManager<ResultType, RequestType> {
     // check if internet available or is no data available in db
     protected abstract fun shouldFetch(data: ResultType?): Boolean
 
-    protected abstract fun makeOnlineRequest(): Boolean
-    // load from database
+    protected abstract fun isInternetAvailable(): Boolean
+
+    protected abstract fun isOnlineRequest(): Boolean
+
+    // load from database if having db
     protected abstract fun loadFromDb(): LiveData<ResultType>
 
     // making a network call

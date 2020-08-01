@@ -1,8 +1,9 @@
 package com.amar.modularnewsapp.ui
 
+import com.amar.data.entities.NewsArticle
+
 
 enum class Screen {
-    TOP_HEADLINE,
     GENERAL,
     BUSINESS,
     SPORTS,
@@ -15,7 +16,6 @@ enum class Screen {
     SETTING
 }
 sealed class MainScreen(val id: Screen) {
-    object Top_HeadLine : MainScreen(Screen.TOP_HEADLINE)
     object General : MainScreen(Screen.GENERAL)
     object Business : MainScreen(Screen.BUSINESS)
     object Sports : MainScreen(Screen.SPORTS)
@@ -24,6 +24,6 @@ sealed class MainScreen(val id: Screen) {
     object Science : MainScreen(Screen.SCIENCE)
     object Technology : MainScreen(Screen.TECHNOLOGY)
     object Search : MainScreen(Screen.SEARCH)
-    object Detail_view : MainScreen(Screen.DETAIL_VIEW)
+    data class Detail_view(val article: NewsArticle) : MainScreen(Screen.DETAIL_VIEW)
     object Setting : MainScreen(Screen.SETTING)
 }

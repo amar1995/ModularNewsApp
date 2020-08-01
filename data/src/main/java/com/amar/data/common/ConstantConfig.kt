@@ -12,4 +12,6 @@ object ConstantConfig {
     const val API_TOP_HEADLINE: String = API_VERSION + "/top-headlines"
 
     const val API_EVERYTHING: String = API_VERSION + "/everything"
+
+    const val PAGE_SIZE = 10
 }

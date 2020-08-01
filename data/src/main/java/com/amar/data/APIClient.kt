@@ -13,7 +13,6 @@ class APIClient {
             .addInterceptor(AuthInterceptor(BuildConfig.NEWS_API_KEY))
             .build()
         inline fun <reified T> retrofitServiceProvider(): T {
-            println("Is adapter called")
             return Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
