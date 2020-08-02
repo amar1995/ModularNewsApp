@@ -323,6 +323,7 @@ fun CustomTab(
                 }
                 is ArticleState.Error -> {
                     // error view
+                    println("error occured >>>>")
                 }
             }
         }

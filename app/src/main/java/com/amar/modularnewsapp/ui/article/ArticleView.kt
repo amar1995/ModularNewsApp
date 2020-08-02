@@ -124,7 +124,7 @@ private fun LoadingMoreArticleView() {
     Box(
         padding = 8.dp,
         gravity = ContentGravity.Center,
-        modifier = androidx.ui.core.Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
     ) {
         ShowLoading()
     }
@@ -136,14 +136,14 @@ private fun LoadMoreArticleButton(
 ) {
     Box(
         gravity = ContentGravity.Center,
-        modifier = androidx.ui.core.Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize()
             .padding(top = 8.dp)
     ) {
         Button(onClick = onPageEndReached) {
             Text(
                 "Load more",
-                style = MaterialTheme.typography.subtitle2,
-                modifier = androidx.ui.core.Modifier.padding(
+                style = MaterialTheme.typography.subtitle2.copy(color = MaterialTheme.colors.onSurface),
+                modifier = Modifier.padding(
                     start = 16.dp,
                     end = 16.dp,
                     top = 12.dp,
@@ -164,7 +164,7 @@ private fun NoMoreArticleView() {
             text = "No more news...",
             style = MaterialTheme.typography.subtitle2
                 .copy(
-                    color = MaterialTheme.colors.onPrimary,
+                    color = MaterialTheme.colors.onSurface,
                     textAlign = TextAlign.Center
                 ),
             modifier = androidx.ui.core.Modifier.padding(

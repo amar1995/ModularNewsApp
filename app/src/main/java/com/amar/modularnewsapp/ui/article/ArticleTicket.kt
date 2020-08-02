@@ -14,6 +14,7 @@ import androidx.ui.unit.dp
 import com.amar.data.entities.NewsArticle
 import com.amar.modularnewsapp.ui.common.UrlImage
 import com.amar.modularnewsapp.ui.dateToString
+import java.util.*
 
 @Composable
 fun ArticleTicket(
@@ -21,6 +22,7 @@ fun ArticleTicket(
     modifier: Modifier = Modifier
 ) {
     val typography = MaterialTheme.typography
+    val colors = MaterialTheme.colors
     Surface(
         color = if (isSystemInDarkTheme()) Color(0xff212121) else Color.White,
         modifier = modifier.padding(16.dp),
@@ -43,18 +45,21 @@ fun ArticleTicket(
             ProvideEmphasis(emphasisLevels.high) {
                 Text(
                     text = if (article.title == null) "Title not given" else article.title!!,
+                    color = colors.onSurface,
                     style = typography.h6
                 )
             }
             ProvideEmphasis(emphasisLevels.high) {
                 Text(
-                    text = if (article.author == null) "Unknow author" else article.author!!,
+                    text = if (article.author == null) "Unknown author" else article.author!!,
+                    color = colors.onSurface,
                     style = typography.body2
                 )
             }
             ProvideEmphasis(emphasisLevels.medium) {
                 Text(
-                    text = dateToString(article.publishedTime!!),
+                    text = if(article.publishedTime == null) dateToString(Date()) else dateToString(article.publishedTime!!),
+                    color = colors.onSurface,
                     style = typography.body2
                 )
             }

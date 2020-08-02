@@ -4,11 +4,13 @@ import android.content.Context
 import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.compose.Composable
+import androidx.ui.animation.animate
 import androidx.ui.core.Alignment
 import androidx.ui.core.ContentScale
 import androidx.ui.core.ContextAmbient
 import androidx.ui.core.Modifier
 import androidx.ui.foundation.*
+import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.BlendMode
 import androidx.ui.graphics.Color
 import androidx.ui.graphics.ColorFilter
@@ -66,7 +68,7 @@ fun NavigationDrawer(
             DrawerButton(
                 icon = R.drawable.ic_baseline_business_24,
                 label = Screen.BUSINESS.name,
-                isSelected = false,
+                isSelected = navigationStack.current() == MainScreen.Business,
                 action = {
 //                    makeToast(context)
                     navigationStack.next(
@@ -80,7 +82,7 @@ fun NavigationDrawer(
             DrawerButton(
                 icon = R.drawable.ic_baseline_sport_24,
                 label = Screen.SPORTS.name,
-                isSelected = false,
+                isSelected = navigationStack.current() == MainScreen.Sports,
                 action = {
 //                    makeToast(context)
                     navigationStack.next(
@@ -94,7 +96,7 @@ fun NavigationDrawer(
             DrawerButton(
                 icon = R.drawable.ic_baseline_entertainment_24,
                 label = Screen.ENTERTAINMENT.name,
-                isSelected = false,
+                isSelected = navigationStack.current() == MainScreen.Entertainment,
                 action = {
 //                    makeToast(context)
                     navigationStack.next(
@@ -108,7 +110,7 @@ fun NavigationDrawer(
             DrawerButton(
                 icon = R.drawable.ic_baseline_health_24,
                 label = Screen.HEALTH.name,
-                isSelected = false,
+                isSelected = navigationStack.current() == MainScreen.Health,
                 action = {
                     navigationStack.next(
                         next = MainScreen.Health,
@@ -122,7 +124,7 @@ fun NavigationDrawer(
             DrawerButton(
                 icon = R.drawable.ic_baseline_science_24,
                 label = Screen.SCIENCE.name,
-                isSelected = false,
+                isSelected = navigationStack.current() == MainScreen.Science,
                 action = {
 //                    makeToast(context)
                     navigationStack.next(
@@ -136,7 +138,7 @@ fun NavigationDrawer(
             DrawerButton(
                 icon = R.drawable.ic_baseline_technology_24,
                 label = Screen.TECHNOLOGY.name,
-                isSelected = false,
+                isSelected = navigationStack.current() == MainScreen.Technology,
                 action = {
 //                    makeToast(context)
                     navigationStack.next(
@@ -179,16 +181,20 @@ private fun DrawerButton(
     isSelected: Boolean,
     action: () -> Unit
 ) {
-    val textIconColor = if (isSelected) {
-        (MaterialTheme.colors).onSurface
-    } else {
-        ((MaterialTheme.colors).onSurface).copy(0.95f)
-    }
-    val backgroundColor = if (isSelected) {
-        ((MaterialTheme.colors).surface).copy(alpha = 0.30f)
-    } else {
-        (MaterialTheme.colors).surface
-    }
+    val textIconColor = animate(
+        if (isSelected) {
+            (MaterialTheme.colors).onSurface
+        } else {
+            ((MaterialTheme.colors).onSurface).copy(alpha = 0.6f)
+        }
+    )
+    val backgroundColor = animate(
+        if (isSelected) {
+            (MaterialTheme.colors.surface).copy(alpha = 0.12f)
+        } else {
+            (MaterialTheme.colors).surface
+        }
+    )
     Surface(
         modifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp),
         color = backgroundColor,
@@ -214,9 +220,10 @@ private fun DrawerButton(
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
                     text = label,
-                    style = ((MaterialTheme.typography).body2).copy(
+                    style = (MaterialTheme.typography.body2).copy(
                         color = textIconColor
-                    )
+                    ),
+                    modifier = Modifier.weight(1f).padding(end = 16.dp)
                 )
             }
         }
@@ -225,14 +232,20 @@ private fun DrawerButton(
 
 @Composable
 private fun SimpleImage(
-    @DrawableRes id: Int,
-    tint: Color = Color.Transparent,
+    @DrawableRes id: Int, tint: Color? = null,
     modifier: Modifier = Modifier
 ) {
     val image = imageResource(id)
-    Box(modifier = Modifier.fillMaxWidth().preferredHeight(150.dp)) {
+    if (tint != null) {
         Image(
-            asset = image
+            asset = image,
+            modifier = modifier,
+            colorFilter = ColorFilter(color = tint, blendMode = BlendMode.srcIn)
+        )
+    } else {
+        Image(
+            asset = image,
+            modifier = modifier
         )
     }
 }
