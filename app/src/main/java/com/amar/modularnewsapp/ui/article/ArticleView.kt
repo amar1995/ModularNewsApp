@@ -48,29 +48,29 @@ fun ShowArticleView(
         refreshingState = false,
         onRefresh = {
             // TODO implement refresh
-//            when (navigationStack.current()) {
-//                is MainScreen.General -> {
-//                    onRefresh(Screen.GENERAL)
-//                }
-//                is MainScreen.Business -> {
-//                    onRefresh(Screen.BUSINESS)
-//                }
-//                is MainScreen.Technology -> {
-//                    onRefresh(Screen.TECHNOLOGY)
-//                }
-//                is MainScreen.Science -> {
-//                    onRefresh(Screen.SCIENCE)
-//                }
-//                is MainScreen.Health -> {
-//                    onRefresh(Screen.HEALTH)
-//                }
-//                is MainScreen.Sports -> {
-//                    onRefresh(Screen.SPORTS)
-//                }
-//                is MainScreen.Entertainment -> {
-//                    onRefresh(Screen.ENTERTAINMENT)
-//                }
-//            }
+            when (navigationStack.current()) {
+                is MainScreen.General -> {
+                    onRefresh(Screen.GENERAL)
+                }
+                is MainScreen.Business -> {
+                    onRefresh(Screen.BUSINESS)
+                }
+                is MainScreen.Technology -> {
+                    onRefresh(Screen.TECHNOLOGY)
+                }
+                is MainScreen.Science -> {
+                    onRefresh(Screen.SCIENCE)
+                }
+                is MainScreen.Health -> {
+                    onRefresh(Screen.HEALTH)
+                }
+                is MainScreen.Sports -> {
+                    onRefresh(Screen.SPORTS)
+                }
+                is MainScreen.Entertainment -> {
+                    onRefresh(Screen.ENTERTAINMENT)
+                }
+            }
         },
         refreshIndicator = {
             Surface(elevation = 10.dp, shape = CircleShape) {

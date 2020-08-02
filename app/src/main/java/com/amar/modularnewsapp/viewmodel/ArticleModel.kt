@@ -14,12 +14,14 @@ import com.amar.data.repository.ArticleRepo
 import com.amar.data.vo.Resource
 import com.amar.data.vo.Status
 import com.amar.modularnewsapp.ui.Screen
+import kotlinx.coroutines.*
 
 class ArticleCache {
     // id, data
     var articleList: LinkedHashMap<String, NewsArticle> = LinkedHashMap()
     private var offset: Int = 0
     private var initialOffset: Int = 0
+    private var refresh: Boolean = false
 
     fun init() {
         this.offset = 0
@@ -30,9 +32,13 @@ class ArticleCache {
     fun refresh() {
         this.offset = 0
         this.initialOffset = 0
-        articleList.clear()
+        this.refresh = true
+        this.articleList.clear()
     }
 
+    fun refreshDone() {
+        this.refresh = false
+    }
     fun updateOffset() {
         this.offset = this.initialOffset + 1
     }
@@ -48,6 +54,10 @@ class ArticleCache {
 
     fun getOffset(): Int {
         return this.offset
+    }
+
+    fun isRefreshing(): Boolean {
+        return this.refresh
     }
 }
 
@@ -74,6 +84,7 @@ object NewsType {
     fun updateCategory(category: Category) {
         this.category = category
     }
+
 }
 
 object SearchNews {
@@ -91,6 +102,9 @@ object SearchNews {
 }
 
 class ArticleModel(application: Application) : AndroidViewModel(application) {
+    private var viewModelJob = SupervisorJob()
+    private var viewModelScope = CoroutineScope(viewModelJob + Dispatchers.Main)
+
     val articleRepo: ArticleRepo by lazy {
         ArticleRepo.getInstance(
             DatabaseClient.getInstance(application),
@@ -192,6 +206,47 @@ class ArticleModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+    private fun clearRefresh(screen: Screen) {
+        when (screen) {
+            Screen.GENERAL -> {
+                _articles.value = _articles.value?.also {
+                    it.generalArticleCache.refreshDone()
+                }
+            }
+            Screen.BUSINESS -> {
+                _articles.value = _articles.value?.also {
+                    it.businessArticleCache.refreshDone()
+                }
+            }
+            Screen.HEALTH -> {
+                _articles.value = _articles.value?.also {
+                    it.healthArticleCache.refreshDone()
+                }
+            }
+            Screen.ENTERTAINMENT -> {
+                _articles.value = _articles.value?.also {
+                    it.entertainmentArticleCache.refreshDone()
+                }
+            }
+            Screen.SCIENCE -> {
+                _articles.value = _articles.value?.also {
+                    it.scienceArticleCache.refreshDone()
+                }
+            }
+            Screen.SPORTS -> {
+                _articles.value = _articles.value?.also {
+                    it.sportsArticleCache.refreshDone()
+                }
+            }
+            Screen.TECHNOLOGY -> {
+                _articles.value = _articles.value?.also {
+                    it.technologyArticleCache.refreshDone()
+                }
+            }
+        }
+    }
+
     fun updateScreen(screen: Screen) {
         when (screen) {
             Screen.GENERAL -> {
@@ -250,26 +305,123 @@ class ArticleModel(application: Application) : AndroidViewModel(application) {
         when (it.category) {
             Category.general -> {
                 println("is general here >>>>")
-                receiveGeneralArticleData(it)
+                if(it.generalArticleCache.isRefreshing()) {
+                    viewModelScope.launch {
+                        articleRepo.deleteArticlesByCategory(Category.general.name)
+                        clearRefresh(Screen.GENERAL)
+                    }
+                    AbsentLiveData.createWithResource(
+                        ArticleViewState(
+                            articleState = ArticleState.Loading,
+                            isLoadingMorePage = true,
+                            hasLoadedAllPages = false
+                        )
+                    )
+                } else {
+                    receiveGeneralArticleData(it)
+                }
             }
             Category.business -> {
-                println("is business here >>>>")
-                receiveBusinessArticleData(it)
+                if(it.businessArticleCache.isRefreshing()) {
+                    viewModelScope.launch {
+                        articleRepo.deleteArticlesByCategory(Category.business.name)
+                        clearRefresh(Screen.BUSINESS)
+                    }
+                    AbsentLiveData.createWithResource(
+                        ArticleViewState(
+                            articleState = ArticleState.Loading,
+                            isLoadingMorePage = true,
+                            hasLoadedAllPages = false
+                        )
+                    )
+                } else {
+                    receiveBusinessArticleData(it)
+                }
             }
             Category.entertainment -> {
-                receiveEntertainmentArticleData(it)
+                if(it.entertainmentArticleCache.isRefreshing()) {
+                    viewModelScope.launch {
+                        articleRepo.deleteArticlesByCategory(Category.entertainment.name)
+                        clearRefresh(Screen.ENTERTAINMENT)
+                    }
+                    AbsentLiveData.createWithResource(
+                        ArticleViewState(
+                            articleState = ArticleState.Loading,
+                            isLoadingMorePage = true,
+                            hasLoadedAllPages = false
+                        )
+                    )
+                } else {
+                    receiveEntertainmentArticleData(it)
+                }
             }
             Category.science -> {
-                receiveScienceArticleData(it)
+                if(it.scienceArticleCache.isRefreshing()) {
+                    viewModelScope.launch {
+                        articleRepo.deleteArticlesByCategory(Category.science.name)
+                        clearRefresh(Screen.SCIENCE)
+                    }
+                    AbsentLiveData.createWithResource(
+                        ArticleViewState(
+                            articleState = ArticleState.Loading,
+                            isLoadingMorePage = true,
+                            hasLoadedAllPages = false
+                        )
+                    )
+                } else {
+                    receiveScienceArticleData(it)
+                }
             }
             Category.technology -> {
-                receiveTechnologyArticleData(it)
+                if(it.technologyArticleCache.isRefreshing()) {
+                    viewModelScope.launch {
+                        articleRepo.deleteArticlesByCategory(Category.technology.name)
+                        clearRefresh(Screen.TECHNOLOGY)
+                    }
+                    AbsentLiveData.createWithResource(
+                        ArticleViewState(
+                            articleState = ArticleState.Loading,
+                            isLoadingMorePage = true,
+                            hasLoadedAllPages = false
+                        )
+                    )
+                } else {
+                    receiveTechnologyArticleData(it)
+                }
             }
             Category.health -> {
-                receiveHealthArticleData(it)
+                if(it.healthArticleCache.isRefreshing()) {
+                    viewModelScope.launch {
+                        articleRepo.deleteArticlesByCategory(Category.health.name)
+                        clearRefresh(Screen.HEALTH)
+                    }
+                    AbsentLiveData.createWithResource(
+                        ArticleViewState(
+                            articleState = ArticleState.Loading,
+                            isLoadingMorePage = true,
+                            hasLoadedAllPages = false
+                        )
+                    )
+                } else {
+                    receiveHealthArticleData(it)
+                }
             }
             Category.sports -> {
-                receiveSportsArticleData(it)
+                if(it.sportsArticleCache.isRefreshing()) {
+                    viewModelScope.launch {
+                        articleRepo.deleteArticlesByCategory(Category.sports.name)
+                        clearRefresh(Screen.SPORTS)
+                    }
+                    AbsentLiveData.createWithResource(
+                        ArticleViewState(
+                            articleState = ArticleState.Loading,
+                            isLoadingMorePage = true,
+                            hasLoadedAllPages = false
+                        )
+                    )
+                } else {
+                    receiveSportsArticleData(it)
+                }
             }
         }
     }
@@ -700,6 +852,11 @@ class ArticleModel(application: Application) : AndroidViewModel(application) {
                 }
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelScope.cancel()
     }
 }
 

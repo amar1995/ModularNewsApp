@@ -240,6 +240,9 @@ fun CustomTab(
                                     articleModel.endOfPage(Screen.HEALTH)
                                 }
                             }
+                        },
+                        onRefresh = {
+                            articleModel.refresh(it)
                         }
                     )
                 }
