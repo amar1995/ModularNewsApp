@@ -108,7 +108,6 @@ class ArticleModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun endOfPage(screen: Screen) {
-        println("is end of page called >>>>")
         when (screen) {
             Screen.GENERAL -> {
                 _articles.value = _articles.value?.also {
@@ -154,6 +153,45 @@ class ArticleModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun refresh(screen: Screen) {
+        when (screen) {
+            Screen.GENERAL -> {
+                _articles.value = _articles.value?.also {
+                    it.generalArticleCache.refresh()
+                }
+            }
+            Screen.BUSINESS -> {
+                _articles.value = _articles.value?.also {
+                    it.businessArticleCache.refresh()
+                }
+            }
+            Screen.HEALTH -> {
+                _articles.value = _articles.value?.also {
+                    it.healthArticleCache.refresh()
+                }
+            }
+            Screen.ENTERTAINMENT -> {
+                _articles.value = _articles.value?.also {
+                    it.entertainmentArticleCache.refresh()
+                }
+            }
+            Screen.SCIENCE -> {
+                _articles.value = _articles.value?.also {
+                    it.scienceArticleCache.refresh()
+                }
+            }
+            Screen.SPORTS -> {
+                _articles.value = _articles.value?.also {
+                    it.sportsArticleCache.refresh()
+                }
+            }
+            Screen.TECHNOLOGY -> {
+                _articles.value = _articles.value?.also {
+                    it.technologyArticleCache.refresh()
+                }
+            }
+        }
+    }
     fun updateScreen(screen: Screen) {
         when (screen) {
             Screen.GENERAL -> {

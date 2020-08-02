@@ -5,12 +5,12 @@ import androidx.compose.key
 import androidx.compose.onCommit
 import androidx.ui.core.Modifier
 import androidx.ui.foundation.*
-import androidx.ui.layout.Column
-import androidx.ui.layout.fillMaxSize
-import androidx.ui.layout.fillMaxWidth
-import androidx.ui.layout.padding
+import androidx.ui.foundation.shape.corner.CircleShape
+import androidx.ui.layout.*
 import androidx.ui.material.Button
+import androidx.ui.material.CircularProgressIndicator
 import androidx.ui.material.MaterialTheme
+import androidx.ui.material.Surface
 import androidx.ui.text.style.TextAlign
 import androidx.ui.unit.dp
 import com.amar.data.entities.NewsArticle
@@ -18,6 +18,7 @@ import com.amar.modularnewsapp.ui.MainScreen
 import com.amar.modularnewsapp.ui.Screen
 import com.amar.modularnewsapp.ui.common.Observe
 import com.amar.modularnewsapp.ui.common.ShowLoading
+import com.amar.modularnewsapp.ui.common.SwipeToRefreshLayout
 import com.amar.modularnewsapp.ui.util.NavigationStack
 import com.amar.modularnewsapp.ui.util.slideRollLeftTransition
 import com.amar.modularnewsapp.ui.util.slideRollRightTransition
@@ -29,7 +30,8 @@ fun ShowArticleView(
     modifier: Modifier = Modifier,
     navigationStack: NavigationStack<MainScreen>,
     articles: ArticleViewState,
-    endOfPage: () -> Unit = {}
+    endOfPage: () -> Unit = {},
+    onRefresh: (Screen) -> Unit = {}
 ) {
     val articleList = articles.articleState as ArticleState.Success
     val scrollState = rememberScrollState()
@@ -42,48 +44,88 @@ fun ShowArticleView(
             }
         }
     }
-    ScrollableColumn(scrollState = scrollState, modifier = modifier) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            when (navigationStack.current()) {
-                is MainScreen.General -> {
-                    showText(value = Screen.GENERAL.name)
-                }
-                is MainScreen.Business -> {
-                    showText(value = Screen.BUSINESS.name)
-                }
-                is MainScreen.Technology -> {
-                    showText(value = Screen.TECHNOLOGY.name)
-                }
-                is MainScreen.Science -> {
-                    showText(value = Screen.SCIENCE.name)
-                }
-                is MainScreen.Health -> {
-                    showText(value = Screen.HEALTH.name)
-                }
-                is MainScreen.Sports -> {
-                    showText(value = Screen.SPORTS.name)
-                }
-                is MainScreen.Entertainment -> {
-                    showText(value = Screen.ENTERTAINMENT.name)
-                }
-            }
-            articleList.articles.forEach {
-                key(it.key) {
-                    ShowArticle(article = it.value, onClick = {
-                        navigationStack.next(
-                            next = MainScreen.Detail_view(it.value),
-                            enterTransition = slideRollLeftTransition,
-                            exitTransition = slideRollRightTransition
-                        )
-                    })
-                }
-            }
-            when {
-                articles.isLoadingMorePage -> LoadingMoreArticleView()
-                !articles.hasLoadedAllPages -> LoadMoreArticleButton(
-                    onPageEndReached = endOfPage
+    SwipeToRefreshLayout(
+        refreshingState = false,
+        onRefresh = {
+            // TODO implement refresh
+//            when (navigationStack.current()) {
+//                is MainScreen.General -> {
+//                    onRefresh(Screen.GENERAL)
+//                }
+//                is MainScreen.Business -> {
+//                    onRefresh(Screen.BUSINESS)
+//                }
+//                is MainScreen.Technology -> {
+//                    onRefresh(Screen.TECHNOLOGY)
+//                }
+//                is MainScreen.Science -> {
+//                    onRefresh(Screen.SCIENCE)
+//                }
+//                is MainScreen.Health -> {
+//                    onRefresh(Screen.HEALTH)
+//                }
+//                is MainScreen.Sports -> {
+//                    onRefresh(Screen.SPORTS)
+//                }
+//                is MainScreen.Entertainment -> {
+//                    onRefresh(Screen.ENTERTAINMENT)
+//                }
+//            }
+        },
+        refreshIndicator = {
+            Surface(elevation = 10.dp, shape = CircleShape) {
+                CircularProgressIndicator(
+                    modifier = Modifier.preferredSize(48.dp).padding(
+                        4.dp
+                    ),
+                    color = MaterialTheme.colors.onSurface
                 )
-                articles.hasLoadedAllPages -> NoMoreArticleView()
+            }
+        }
+    ) {
+        ScrollableColumn(scrollState = scrollState, modifier = modifier) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                when (navigationStack.current()) {
+                    is MainScreen.General -> {
+                        showText(value = Screen.GENERAL.name)
+                    }
+                    is MainScreen.Business -> {
+                        showText(value = Screen.BUSINESS.name)
+                    }
+                    is MainScreen.Technology -> {
+                        showText(value = Screen.TECHNOLOGY.name)
+                    }
+                    is MainScreen.Science -> {
+                        showText(value = Screen.SCIENCE.name)
+                    }
+                    is MainScreen.Health -> {
+                        showText(value = Screen.HEALTH.name)
+                    }
+                    is MainScreen.Sports -> {
+                        showText(value = Screen.SPORTS.name)
+                    }
+                    is MainScreen.Entertainment -> {
+                        showText(value = Screen.ENTERTAINMENT.name)
+                    }
+                }
+                articleList.articles.forEach {
+                    key(it.key) {
+                        ShowArticle(article = it.value, onClick = {
+                            navigationStack.next(
+                                next = MainScreen.Detail_view(it.value),
+                                enterTransition = slideRollLeftTransition,
+                                exitTransition = slideRollRightTransition
+                            )
+                        })
+                    }
+                }
+                when {
+                    articles.isLoadingMorePage -> LoadingMoreArticleView()
+                    !articles.hasLoadedAllPages -> LoadMoreArticleButton(
+                        onPageEndReached = endOfPage
+                    )
+                    articles.hasLoadedAllPages -> NoMoreArticleView()
+                }
             }
         }
     }
