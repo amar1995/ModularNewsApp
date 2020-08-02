@@ -25,7 +25,7 @@ fun ArticleTicket(
 ) {
     val typography = MaterialTheme.typography
     Surface(
-        color = if(isSystemInDarkTheme()) Color(0xff212121) else Color.LightGray,
+        color = if(isSystemInDarkTheme()) Color(0xff212121) else Color.White,
         modifier = modifier.padding(16.dp),
         shape = MaterialTheme.shapes.large
     ) {

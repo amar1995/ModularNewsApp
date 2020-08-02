@@ -15,6 +15,7 @@ import androidx.ui.text.style.TextAlign
 import androidx.ui.unit.dp
 import com.amar.data.entities.NewsArticle
 import com.amar.modularnewsapp.ui.MainScreen
+import com.amar.modularnewsapp.ui.Screen
 import com.amar.modularnewsapp.ui.common.Observe
 import com.amar.modularnewsapp.ui.common.ShowLoading
 import com.amar.modularnewsapp.ui.util.NavigationStack
@@ -44,6 +45,29 @@ fun ShowArticleView(
     }
     ScrollableColumn(scrollState = scrollState, modifier = modifier) {
         Column(modifier = Modifier.fillMaxWidth()) {
+            when (navigationStack.current()) {
+                is MainScreen.General -> {
+                    showText(value = Screen.GENERAL.name)
+                }
+                is MainScreen.Business -> {
+                    showText(value = Screen.BUSINESS.name)
+                }
+                is MainScreen.Technology -> {
+                    showText(value = Screen.TECHNOLOGY.name)
+                }
+                is MainScreen.Science -> {
+                    showText(value = Screen.SCIENCE.name)
+                }
+                is MainScreen.Health -> {
+                    showText(value = Screen.HEALTH.name)
+                }
+                is MainScreen.Sports -> {
+                    showText(value = Screen.SPORTS.name)
+                }
+                is MainScreen.Entertainment -> {
+                    showText(value = Screen.ENTERTAINMENT.name)
+                }
+            }
             articleList.articles.forEach {
                 key(it.key) {
                     ShowArticle(article = it.value, onClick = {
@@ -66,6 +90,18 @@ fun ShowArticleView(
     }
 }
 
+@Composable
+private fun showText(value: String) {
+    Text(
+        text = value,
+        modifier = Modifier.padding(top = 10.dp, start = 10.dp, end = 10.dp),
+        style = MaterialTheme.typography.body1.copy(
+            MaterialTheme.colors.onBackground.copy(
+                0.6f
+            )
+        )
+    )
+}
 @Composable
 private fun ShowArticle(
     article: NewsArticle,

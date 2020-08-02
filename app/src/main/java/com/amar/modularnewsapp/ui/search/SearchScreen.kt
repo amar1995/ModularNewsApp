@@ -1,10 +1,12 @@
 package com.amar.modularnewsapp.ui.search
 
+import android.content.Context
 import androidx.compose.Composable
 import androidx.compose.getValue
 import androidx.compose.onCommit
 import androidx.compose.setValue
 import androidx.ui.core.Alignment
+import androidx.ui.core.ContextAmbient
 import androidx.ui.core.Modifier
 import androidx.ui.core.focus.FocusDetailedState
 import androidx.ui.core.focus.FocusModifier
@@ -22,7 +24,7 @@ import androidx.ui.material.IconButton
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.Scaffold
 import androidx.ui.material.icons.Icons
-import androidx.ui.material.icons.filled.Close
+import androidx.ui.material.icons.filled.ArrowBack
 import androidx.ui.material.icons.filled.History
 import androidx.ui.savedinstancestate.savedInstanceState
 import androidx.ui.text.TextRange
@@ -30,9 +32,11 @@ import androidx.ui.unit.dp
 import com.amar.modularnewsapp.ui.MainScreen
 import com.amar.modularnewsapp.ui.common.AppBarType
 import com.amar.modularnewsapp.ui.util.NavigationStack
+import com.amar.modularnewsapp.viewmodel.ArticleModel
 
 @Composable
 fun SearchScreen(
+    articleModel: ArticleModel,
     navigationStack: NavigationStack<MainScreen>
 ) {
     var filterText by savedInstanceState { TextFieldValue("") }
@@ -49,7 +53,7 @@ fun SearchScreen(
                         onClick = {
                             navigationStack.back()
                         }) {
-                        Icon(Icons.Filled.Close)
+                        Icon(Icons.Filled.ArrowBack)
                     }
                 },
                 actions = {
@@ -92,7 +96,9 @@ private fun filterField(
         value = filterText,
         onValueChange = onFilter,
         onFocusChanged = {
-
+            if(!it) {
+                // call search
+            }
         },
         modifier = modifier + focus,
         cursorColor = MaterialTheme.colors.onSurface,
@@ -105,7 +111,7 @@ private fun filterField(
     )
     Text(text = "", modifier = nextFocus)
 }
-
+private val historyStringSeperator = "$#%@!_:)"
 @Suppress("DEPRECATION")
 @Composable
 private fun searchBarView(
@@ -114,11 +120,16 @@ private fun searchBarView(
     focus: FocusModifier,
     navigationStack: NavigationStack<MainScreen>
 ) {
+    val context = ContextAmbient.current
+    val pref = context.getSharedPreferences("searchHistory", Context.MODE_PRIVATE)
+    val history = pref.getStringSet("histories", emptySet())
+
     var previosData by savedInstanceState {
-        mutableListOf<String>("label:")
+        history!!.map {
+            it.split(historyStringSeperator)[1]
+        }
     }
-    val data = previosData
-        .filter { it.contains(filterText.text, ignoreCase = true) }
+    val data = previosData.filter { it.contains(filterText.text, ignoreCase = true) }
 
     if (focus.focusDetailedState == FocusDetailedState.Active || filterText.text.isNullOrBlank()) {
         ScrollableColumn() {
@@ -148,7 +159,30 @@ private fun searchBarView(
         }
     } else {
         // TODO save history
+        // store max 6 last searched item
+        val valueToSave = filterText.text
+        if(history!!.size > 6) {
+            val size = "6" + historyStringSeperator
+            val temp = mutableSetOf<String>()
+            for(i in history) {
+                val index = i.split(historyStringSeperator)[0].toInt()
+                val value = i.split(historyStringSeperator)[1]
+                if(index != 1) {
+                    temp.add((index-1).toString() + value)
+                }
+            }
+            temp.add(size+valueToSave)
+            history.clear()
+            history.addAll(temp)
+        } else {
+            val size = history.size.toString() + historyStringSeperator
+            history.add(size+valueToSave)
+        }
         filterViewItem(navigationStack = navigationStack)
+        val editor = pref.edit()
+        editor.putStringSet("histories", history)
+        editor.apply()
+        editor.commit()
     }
 }
 

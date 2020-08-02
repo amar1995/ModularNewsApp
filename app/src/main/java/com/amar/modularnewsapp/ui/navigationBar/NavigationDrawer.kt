@@ -44,7 +44,6 @@ fun NavigationDrawer(
         )
         // TODO add selected shade
         ScrollableColumn(modifier = Modifier.padding(8.dp).weight(1f)) {
-
             DrawerButton(
                 icon = R.drawable.ic_baseline_general_24,
                 label = Screen.GENERAL.name,
@@ -89,7 +88,8 @@ fun NavigationDrawer(
                 label = Screen.ENTERTAINMENT.name,
                 isSelected = false,
                 action = {
-                    makeToast(context)
+//                    makeToast(context)
+                    navigationStack.next(next = MainScreen.Entertainment, enterTransition = slideInTransition, exitTransition = slideOutTransition)
                     onDrawerStateChange(DrawerState.Closed)
                 }
             )
@@ -98,6 +98,7 @@ fun NavigationDrawer(
                 label = Screen.HEALTH.name,
                 isSelected = false,
                 action = {
+                    navigationStack.next(next = MainScreen.Health, enterTransition = slideInTransition, exitTransition = slideOutTransition)
                     onDrawerStateChange(DrawerState.Closed)
                 }
             )
@@ -107,7 +108,8 @@ fun NavigationDrawer(
                 label = Screen.SCIENCE.name,
                 isSelected = false,
                 action = {
-                    makeToast(context)
+//                    makeToast(context)
+                    navigationStack.next(next = MainScreen.Science, enterTransition = slideInTransition, exitTransition = slideOutTransition)
                     onDrawerStateChange(DrawerState.Closed)
                 }
             )
@@ -116,7 +118,8 @@ fun NavigationDrawer(
                 label = Screen.TECHNOLOGY.name,
                 isSelected = false,
                 action = {
-                    makeToast(context)
+//                    makeToast(context)
+                    navigationStack.next(next = MainScreen.Technology, enterTransition = slideInTransition, exitTransition = slideOutTransition)
                     onDrawerStateChange(DrawerState.Closed)
                 }
             )

@@ -26,16 +26,14 @@ import androidx.ui.text.SpanStyle
 import androidx.ui.text.TextStyle
 import androidx.ui.text.style.TextDecoration
 import androidx.ui.unit.dp
-import androidx.work.Constraints
-import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
 import com.amar.data.entities.NewsArticle
-import com.amar.data.worker.RefreshDataWorker
 import com.amar.modularnewsapp.common.BaseViewModelFactory
 import com.amar.modularnewsapp.ui.article.ShowArticleView
 import com.amar.modularnewsapp.ui.common.AppBarType
+import com.amar.modularnewsapp.ui.common.ShowLoading
 import com.amar.modularnewsapp.ui.common.UrlImage
 import com.amar.modularnewsapp.ui.navigationBar.NavigationDrawer
+import com.amar.modularnewsapp.ui.search.SearchScreen
 import com.amar.modularnewsapp.ui.theme.DistillTheme
 import com.amar.modularnewsapp.ui.util.NavigationStack
 import com.amar.modularnewsapp.ui.util.Route
@@ -60,15 +58,8 @@ class MainActivity : AppCompatActivity() {
                 .get(ArticleModel::class.java)
 
         println("Activty A onCreate")
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .setRequiresBatteryNotLow(true).build()
-        val dataRefreshWork = OneTimeWorkRequestBuilder<RefreshDataWorker>()
-            .setConstraints(constraints).build()
-//        --------- uncomment to refresh on app start
-//        WorkManager.getInstance(applicationContext).enqueue(dataRefreshWork)
         setContent {
-            navigationStack = NavigationStack(MainScreen.General)
+            navigationStack = remember { NavigationStack(MainScreen.General) }
 
             DistillTheme {
                 NewsApp(navigationStack)
@@ -118,7 +109,10 @@ fun NewsApp(navigationStack: NavigationStack<MainScreen>) {
     Route(navigationStack.getTransition()) { screen: MainScreen ->
         when (screen) {
             is MainScreen.Search -> {
-
+                SearchScreen(
+                    articleModel = newArticleModel,
+                    navigationStack = navigationStack
+                )
             }
             is MainScreen.Detail_view -> {
                 showNewArticleInDetail(article = screen.article, navigationStack = navigationStack)
@@ -174,21 +168,32 @@ fun AppContent(
     ) {
         when (navigationStack.current()) {
             MainScreen.Business -> {
-                Surface(color = (MaterialTheme.colors).surface) {
-                    Column {
-                        CustomTab(navigationStack = navigationStack)
-                    }
-                }
+                newArticleModel.updateScreen(Screen.BUSINESS)
             }
             MainScreen.General -> {
-                Surface(color = (MaterialTheme.colors).surface) {
-                    Column {
-                        CustomTab(navigationStack = navigationStack)
-                    }
-                }
+                newArticleModel.updateScreen(Screen.GENERAL)
+            }
+            MainScreen.Technology -> {
+                newArticleModel.updateScreen(Screen.TECHNOLOGY)
+            }
+            MainScreen.Entertainment -> {
+                newArticleModel.updateScreen(Screen.ENTERTAINMENT)
+            }
+            MainScreen.Sports -> {
+                newArticleModel.updateScreen(Screen.SPORTS)
+            }
+            MainScreen.Science -> {
+                newArticleModel.updateScreen(Screen.SCIENCE)
+            }
+            MainScreen.Health -> {
+                newArticleModel.updateScreen(Screen.HEALTH)
             }
         }
-
+        Surface(color = (MaterialTheme.colors).surface) {
+            Column {
+                CustomTab(navigationStack = navigationStack)
+            }
+        }
     }
 }
 
@@ -200,11 +205,11 @@ fun CustomTab(
     val internationalState by newArticleModel.articles.observeAsState()
     Surface(color = MaterialTheme.colors.background, modifier = Modifier.fillMaxWidth()) {
         if (internationalState == null) {
-            showLoading()
+            ShowLoading()
         } else {
             when (internationalState!!.articleState) {
                 is ArticleState.Loading -> {
-                    showLoading()
+                    ShowLoading()
                 }
                 is ArticleState.Success -> {
                     ShowArticleView(
@@ -221,27 +226,6 @@ fun CustomTab(
             }
         }
     }
-}
-
-@Composable
-private fun showLoading(
-    color: Color = MaterialTheme.colors.secondaryVariant,
-    modifier: Modifier = Modifier
-) {
-    Box(modifier = modifier.fillMaxSize(), gravity = ContentGravity.Center) {
-        CircularProgressIndicator(
-            color = color,
-            modifier = Modifier.wrapContentWidth(Alignment.CenterHorizontally)
-        )
-    }
-}
-
-@Composable
-private fun showError(msg: String) {
-    Text(
-        msg,
-        style = TextStyle(Color.Red)
-    )
 }
 
 @Composable

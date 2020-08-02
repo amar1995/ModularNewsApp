@@ -15,16 +15,11 @@ interface ArticleService {
     // https://newsapi.org/v2/everything?q=sports&language=en
 
     // &country=us&country=jp&country=au&country=ca&country=za&country=sg&country=mx&country=hk
-    @GET(API_TOP_HEADLINE + "?country=in")
-    suspend fun getTopHeadLine(@QueryMap options: Map<String, String>): NewsArticleResponse
-
-    @GET(API_TOP_HEADLINE + "?country=in")
-    suspend fun getArticle(@QueryMap options: Map<String, String>): Response<NewsArticleResponse>
 
     @GET(API_TOP_HEADLINE)
-    fun getArticle2(@QueryMap options: Map<String, String>): LiveData<ApiResponse<NewsArticleResponse?>>
+    fun getArticle(@QueryMap options: Map<String, String>): LiveData<ApiResponse<NewsArticleResponse?>>
 
     @GET(API_EVERYTHING + "?language=en")
-    fun getEverything(@Header("Authorization") key: String, @QueryMap options: Map<String, String>): Call<NewsArticleResponse>
+    fun getEverything(@QueryMap options: Map<String, String>): LiveData<ApiResponse<NewsArticleResponse?>>
 
 }
