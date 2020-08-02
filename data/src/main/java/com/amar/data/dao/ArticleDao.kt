@@ -1,7 +1,10 @@
 package com.amar.data.dao
 
 import androidx.lifecycle.LiveData
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import com.amar.data.common.ConstantConfig.TABLE_NAME
 import com.amar.data.entities.NewsArticle
 
@@ -15,7 +18,6 @@ interface ArticleDao {
 
     @Query("Select * from $TABLE_NAME where category = \"all\" ")
     fun getArticles(): LiveData<List<NewsArticle>>
-
 
     @Query("Select * from $TABLE_NAME where category = :category order by $TABLE_NAME.time desc")
     fun getCategoryArticles(category: String): LiveData<List<NewsArticle>>

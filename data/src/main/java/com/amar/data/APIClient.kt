@@ -12,6 +12,7 @@ class APIClient {
         val client = OkHttpClient.Builder()
             .addInterceptor(AuthInterceptor(BuildConfig.NEWS_API_KEY))
             .build()
+
         inline fun <reified T> retrofitServiceProvider(): T {
             return Retrofit.Builder()
                 .baseUrl(BASE_URL)

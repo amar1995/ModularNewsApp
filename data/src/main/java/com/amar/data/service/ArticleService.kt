@@ -4,10 +4,7 @@ import androidx.lifecycle.LiveData
 import com.amar.data.common.ConstantConfig.API_EVERYTHING
 import com.amar.data.common.ConstantConfig.API_TOP_HEADLINE
 import com.amar.data.entities.NewsArticleResponse
-import retrofit2.Call
-import retrofit2.Response
 import retrofit2.http.GET
-import retrofit2.http.Header
 import retrofit2.http.QueryMap
 
 interface ArticleService {
@@ -19,7 +16,7 @@ interface ArticleService {
     @GET(API_TOP_HEADLINE)
     fun getArticle(@QueryMap options: Map<String, String>): LiveData<ApiResponse<NewsArticleResponse?>>
 
-    @GET(API_EVERYTHING + "?language=en")
+    @GET(API_EVERYTHING)
     fun getEverything(@QueryMap options: Map<String, String>): LiveData<ApiResponse<NewsArticleResponse?>>
 
 }

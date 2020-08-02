@@ -9,11 +9,12 @@ import androidx.compose.*
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.ui.core.Alignment
 import androidx.ui.core.ContextAmbient
 import androidx.ui.core.Modifier
 import androidx.ui.core.setContent
-import androidx.ui.foundation.*
+import androidx.ui.foundation.Icon
+import androidx.ui.foundation.Text
+import androidx.ui.foundation.clickable
 import androidx.ui.graphics.Color
 import androidx.ui.layout.*
 import androidx.ui.livedata.observeAsState
@@ -23,7 +24,6 @@ import androidx.ui.material.icons.filled.Close
 import androidx.ui.material.icons.filled.Menu
 import androidx.ui.text.AnnotatedString
 import androidx.ui.text.SpanStyle
-import androidx.ui.text.TextStyle
 import androidx.ui.text.style.TextDecoration
 import androidx.ui.unit.dp
 import com.amar.data.entities.NewsArticle
@@ -44,14 +44,14 @@ import com.amar.modularnewsapp.viewmodel.ArticleState
 import java.text.SimpleDateFormat
 import java.util.*
 
-private lateinit var newArticleModel: ArticleModel
+private lateinit var articleModel: ArticleModel
 
 class MainActivity : AppCompatActivity() {
     private lateinit var navigationStack: NavigationStack<MainScreen>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        newArticleModel =
+        articleModel =
             ViewModelProviders.of(
                 this,
                 BaseViewModelFactory { ArticleModel(application = this.application) })
@@ -110,7 +110,7 @@ fun NewsApp(navigationStack: NavigationStack<MainScreen>) {
         when (screen) {
             is MainScreen.Search -> {
                 SearchScreen(
-                    articleModel = newArticleModel,
+                    articleModel = articleModel,
                     navigationStack = navigationStack
                 )
             }
@@ -130,7 +130,6 @@ fun NewsApp(navigationStack: NavigationStack<MainScreen>) {
 fun AppContent(
     navigationStack: NavigationStack<MainScreen>
 ) {
-    val context = ContextAmbient.current
     val scaffoldState = ScaffoldState(isDrawerGesturesEnabled = false)
     Scaffold(
         topBar = {
@@ -142,6 +141,8 @@ fun AppContent(
                     }
                 },
                 actions = {
+                    // TODO remove indication
+                    articleModel.clearSearch()
                     Text(
                         text = "Search News",
                         modifier = Modifier.weight(1f) + Modifier.clickable(
@@ -168,25 +169,25 @@ fun AppContent(
     ) {
         when (navigationStack.current()) {
             MainScreen.Business -> {
-                newArticleModel.updateScreen(Screen.BUSINESS)
+                articleModel.updateScreen(Screen.BUSINESS)
             }
             MainScreen.General -> {
-                newArticleModel.updateScreen(Screen.GENERAL)
+                articleModel.updateScreen(Screen.GENERAL)
             }
             MainScreen.Technology -> {
-                newArticleModel.updateScreen(Screen.TECHNOLOGY)
+                articleModel.updateScreen(Screen.TECHNOLOGY)
             }
             MainScreen.Entertainment -> {
-                newArticleModel.updateScreen(Screen.ENTERTAINMENT)
+                articleModel.updateScreen(Screen.ENTERTAINMENT)
             }
             MainScreen.Sports -> {
-                newArticleModel.updateScreen(Screen.SPORTS)
+                articleModel.updateScreen(Screen.SPORTS)
             }
             MainScreen.Science -> {
-                newArticleModel.updateScreen(Screen.SCIENCE)
+                articleModel.updateScreen(Screen.SCIENCE)
             }
             MainScreen.Health -> {
-                newArticleModel.updateScreen(Screen.HEALTH)
+                articleModel.updateScreen(Screen.HEALTH)
             }
         }
         Surface(color = (MaterialTheme.colors).surface) {
@@ -202,21 +203,43 @@ fun AppContent(
 fun CustomTab(
     navigationStack: NavigationStack<MainScreen>
 ) {
-    val internationalState by newArticleModel.articles.observeAsState()
+    val articleState by articleModel.articles.observeAsState()
     Surface(color = MaterialTheme.colors.background, modifier = Modifier.fillMaxWidth()) {
-        if (internationalState == null) {
+        if (articleState == null) {
             ShowLoading()
         } else {
-            when (internationalState!!.articleState) {
+            when (articleState!!.articleState) {
                 is ArticleState.Loading -> {
                     ShowLoading()
                 }
                 is ArticleState.Success -> {
                     ShowArticleView(
                         navigationStack = navigationStack,
-                        articles = internationalState!!,
+                        articles = articleState!!,
                         endOfPage = {
-                            newArticleModel.endOfPage(Screen.GENERAL)
+                            when (navigationStack.current()) {
+                                MainScreen.Business -> {
+                                    articleModel.endOfPage(Screen.BUSINESS)
+                                }
+                                MainScreen.General -> {
+                                    articleModel.endOfPage(Screen.GENERAL)
+                                }
+                                MainScreen.Technology -> {
+                                    articleModel.endOfPage(Screen.TECHNOLOGY)
+                                }
+                                MainScreen.Entertainment -> {
+                                    articleModel.endOfPage(Screen.ENTERTAINMENT)
+                                }
+                                MainScreen.Sports -> {
+                                    articleModel.endOfPage(Screen.SPORTS)
+                                }
+                                MainScreen.Science -> {
+                                    articleModel.endOfPage(Screen.SCIENCE)
+                                }
+                                MainScreen.Health -> {
+                                    articleModel.endOfPage(Screen.HEALTH)
+                                }
+                            }
                         }
                     )
                 }

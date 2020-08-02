@@ -1,6 +1,5 @@
 package com.amar.modularnewsapp.ui.common
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import androidx.compose.*

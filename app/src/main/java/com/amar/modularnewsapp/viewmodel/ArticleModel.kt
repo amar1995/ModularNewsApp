@@ -9,6 +9,7 @@ import com.amar.data.APIClient
 import com.amar.data.DatabaseClient
 import com.amar.data.common.AbsentLiveData
 import com.amar.data.entities.NewsArticle
+import com.amar.data.entities.NewsArticleResponse
 import com.amar.data.repository.ArticleRepo
 import com.amar.data.vo.Resource
 import com.amar.data.vo.Status
@@ -61,8 +62,6 @@ enum class Category {
 }
 
 object NewsType {
-    var offset: Int = 0
-    var initialOffset: Int = 0
     var category: Category = Category.general
     var generalArticleCache = ArticleCache()
     var sportsArticleCache = ArticleCache()
@@ -77,6 +76,20 @@ object NewsType {
     }
 }
 
+object SearchNews {
+    var value = ""
+    var searchArticleCache = ArticleCache()
+    fun clear() {
+        this.value = ""
+        this.searchArticleCache.refresh()
+    }
+
+    fun query(value: String) {
+        this.value = value
+        this.searchArticleCache.refresh()
+    }
+}
+
 class ArticleModel(application: Application) : AndroidViewModel(application) {
     val articleRepo: ArticleRepo by lazy {
         ArticleRepo.getInstance(
@@ -86,9 +99,12 @@ class ArticleModel(application: Application) : AndroidViewModel(application) {
         )
     }
     private var _articles: MutableLiveData<NewsType> = MutableLiveData()
+    private var _searches: MutableLiveData<SearchNews> = MutableLiveData()
+    val search: LiveData<SearchNews> = _searches
 
     init {
         _articles.postValue(NewsType)
+        _searches.postValue(SearchNews)
     }
 
     fun endOfPage(screen: Screen) {
@@ -132,6 +148,12 @@ class ArticleModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun endOfSearchPage() {
+        _searches.value = _searches.value?.also {
+            it.searchArticleCache.updateOffset()
+        }
+    }
+
     fun updateScreen(screen: Screen) {
         when (screen) {
             Screen.GENERAL -> {
@@ -172,6 +194,20 @@ class ArticleModel(application: Application) : AndroidViewModel(application) {
         }
 
     }
+
+    fun search(query: String) {
+        if (!query.isNullOrBlank()) {
+            _searches.value = _searches.value.also {
+                it!!.query(query)
+            }
+        }
+    }
+
+    fun clearSearch() {
+        SearchNews.clear()
+        _searches.postValue(SearchNews)
+    }
+
     val articles = _articles.switchMap {
         when (it.category) {
             Category.general -> {
@@ -200,10 +236,14 @@ class ArticleModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    val searches = _searches.switchMap {
+        receiveSearchArticleData(it)
+    }
+
     private fun receiveGeneralArticleData(news: NewsType): LiveData<ArticleViewState> {
         return articleRepo.loadData(
             category = Category.general.name,
-            pageNo = news.generalArticleCache.getOffset()
+            pageNo = news.generalArticleCache.getOffset() + 1
         ).switchMap { data: Resource<List<NewsArticle>> ->
             when (data.status) {
                 Status.LOADING -> {
@@ -256,7 +296,7 @@ class ArticleModel(application: Application) : AndroidViewModel(application) {
     private fun receiveBusinessArticleData(news: NewsType): LiveData<ArticleViewState> {
         return articleRepo.loadData(
             category = Category.business.name,
-            pageNo = news.businessArticleCache.getOffset()
+            pageNo = news.businessArticleCache.getOffset() + 1
         ).switchMap { data: Resource<List<NewsArticle>> ->
             when (data.status) {
                 Status.LOADING -> {
@@ -309,7 +349,7 @@ class ArticleModel(application: Application) : AndroidViewModel(application) {
     private fun receiveEntertainmentArticleData(news: NewsType): LiveData<ArticleViewState> {
         return articleRepo.loadData(
             category = Category.entertainment.name,
-            pageNo = news.entertainmentArticleCache.getOffset()
+            pageNo = news.entertainmentArticleCache.getOffset() + 1
         ).switchMap { data: Resource<List<NewsArticle>> ->
             when (data.status) {
                 Status.LOADING -> {
@@ -362,7 +402,7 @@ class ArticleModel(application: Application) : AndroidViewModel(application) {
     private fun receiveScienceArticleData(news: NewsType): LiveData<ArticleViewState> {
         return articleRepo.loadData(
             category = Category.science.name,
-            pageNo = news.scienceArticleCache.getOffset()
+            pageNo = news.scienceArticleCache.getOffset() + 1
         ).switchMap { data: Resource<List<NewsArticle>> ->
             when (data.status) {
                 Status.LOADING -> {
@@ -415,7 +455,7 @@ class ArticleModel(application: Application) : AndroidViewModel(application) {
     private fun receiveTechnologyArticleData(news: NewsType): LiveData<ArticleViewState> {
         return articleRepo.loadData(
             category = Category.technology.name,
-            pageNo = news.technologyArticleCache.getOffset()
+            pageNo = news.technologyArticleCache.getOffset() + 1
         ).switchMap { data: Resource<List<NewsArticle>> ->
             when (data.status) {
                 Status.LOADING -> {
@@ -468,7 +508,7 @@ class ArticleModel(application: Application) : AndroidViewModel(application) {
     private fun receiveHealthArticleData(news: NewsType): LiveData<ArticleViewState> {
         return articleRepo.loadData(
             category = Category.health.name,
-            pageNo = news.healthArticleCache.getOffset()
+            pageNo = news.healthArticleCache.getOffset() + 1
         ).switchMap { data: Resource<List<NewsArticle>> ->
             when (data.status) {
                 Status.LOADING -> {
@@ -521,7 +561,7 @@ class ArticleModel(application: Application) : AndroidViewModel(application) {
     private fun receiveSportsArticleData(news: NewsType): LiveData<ArticleViewState> {
         return articleRepo.loadData(
             category = Category.sports.name,
-            pageNo = news.sportsArticleCache.getOffset()
+            pageNo = news.sportsArticleCache.getOffset() + 1
         ).switchMap { data: Resource<List<NewsArticle>> ->
             when (data.status) {
                 Status.LOADING -> {
@@ -571,6 +611,58 @@ class ArticleModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    private fun receiveSearchArticleData(news: SearchNews): LiveData<ArticleViewState> {
+        return articleRepo.searchData(
+            query = news.value,
+            pageNo = news.searchArticleCache.getOffset() + 1
+        ).switchMap { data: Resource<NewsArticleResponse?> ->
+            when (data.status) {
+                Status.LOADING -> {
+                    AbsentLiveData.createWithResource(
+                        ArticleViewState(
+                            articleState = if (news.searchArticleCache.articleList.isNullOrEmpty()) ArticleState.Loading else ArticleState.Success(
+                                news.searchArticleCache.articleList
+                            ),
+                            isLoadingMorePage = true,
+                            hasLoadedAllPages = false
+                        )
+                    )
+                }
+                Status.SUCCESS -> {
+                    if (data.data == null) {
+                        AbsentLiveData.createWithResource(
+                            ArticleViewState(
+                                articleState = ArticleState.Success(news.searchArticleCache.articleList),
+                                isLoadingMorePage = false,
+                                hasLoadedAllPages = true
+                            )
+                        )
+                    } else {
+                        news.searchArticleCache.updateInitialOffset()
+                        for (i in data.data!!.article) {
+                            news.searchArticleCache.articleList.put(i.url, i)
+                        }
+                        AbsentLiveData.createWithResource(
+                            ArticleViewState(
+                                articleState = ArticleState.Success(news.searchArticleCache.articleList),
+                                isLoadingMorePage = false,
+                                hasLoadedAllPages = false
+                            )
+                        )
+                    }
+                }
+                else -> {
+                    AbsentLiveData.createWithResource(
+                        ArticleViewState(
+                            articleState = ArticleState.Error(Throwable("Unknown Error")),
+                            hasLoadedAllPages = false,
+                            isLoadingMorePage = false
+                        )
+                    )
+                }
+            }
+        }
+    }
 }
 
 data class ArticleViewState(

@@ -69,7 +69,11 @@ fun NavigationDrawer(
                 isSelected = false,
                 action = {
 //                    makeToast(context)
-                    navigationStack.next(next = MainScreen.Business, enterTransition = slideInTransition, exitTransition = slideOutTransition)
+                    navigationStack.next(
+                        next = MainScreen.Business,
+                        enterTransition = slideInTransition,
+                        exitTransition = slideOutTransition
+                    )
                     onDrawerStateChange(DrawerState.Closed)
                 }
             )
@@ -79,7 +83,11 @@ fun NavigationDrawer(
                 isSelected = false,
                 action = {
 //                    makeToast(context)
-                    navigationStack.next(next = MainScreen.Sports, enterTransition = slideInTransition, exitTransition = slideOutTransition)
+                    navigationStack.next(
+                        next = MainScreen.Sports,
+                        enterTransition = slideInTransition,
+                        exitTransition = slideOutTransition
+                    )
                     onDrawerStateChange(DrawerState.Closed)
                 }
             )
@@ -89,7 +97,11 @@ fun NavigationDrawer(
                 isSelected = false,
                 action = {
 //                    makeToast(context)
-                    navigationStack.next(next = MainScreen.Entertainment, enterTransition = slideInTransition, exitTransition = slideOutTransition)
+                    navigationStack.next(
+                        next = MainScreen.Entertainment,
+                        enterTransition = slideInTransition,
+                        exitTransition = slideOutTransition
+                    )
                     onDrawerStateChange(DrawerState.Closed)
                 }
             )
@@ -98,7 +110,11 @@ fun NavigationDrawer(
                 label = Screen.HEALTH.name,
                 isSelected = false,
                 action = {
-                    navigationStack.next(next = MainScreen.Health, enterTransition = slideInTransition, exitTransition = slideOutTransition)
+                    navigationStack.next(
+                        next = MainScreen.Health,
+                        enterTransition = slideInTransition,
+                        exitTransition = slideOutTransition
+                    )
                     onDrawerStateChange(DrawerState.Closed)
                 }
             )
@@ -109,7 +125,11 @@ fun NavigationDrawer(
                 isSelected = false,
                 action = {
 //                    makeToast(context)
-                    navigationStack.next(next = MainScreen.Science, enterTransition = slideInTransition, exitTransition = slideOutTransition)
+                    navigationStack.next(
+                        next = MainScreen.Science,
+                        enterTransition = slideInTransition,
+                        exitTransition = slideOutTransition
+                    )
                     onDrawerStateChange(DrawerState.Closed)
                 }
             )
@@ -119,7 +139,11 @@ fun NavigationDrawer(
                 isSelected = false,
                 action = {
 //                    makeToast(context)
-                    navigationStack.next(next = MainScreen.Technology, enterTransition = slideInTransition, exitTransition = slideOutTransition)
+                    navigationStack.next(
+                        next = MainScreen.Technology,
+                        enterTransition = slideInTransition,
+                        exitTransition = slideOutTransition
+                    )
                     onDrawerStateChange(DrawerState.Closed)
                 }
             )

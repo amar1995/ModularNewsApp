@@ -3,7 +3,10 @@ package com.amar.modularnewsapp.ui.theme
 import androidx.compose.Composable
 import androidx.ui.foundation.isSystemInDarkTheme
 import androidx.ui.graphics.Color
-import androidx.ui.material.*
+import androidx.ui.material.ColorPalette
+import androidx.ui.material.MaterialTheme
+import androidx.ui.material.darkColorPalette
+import androidx.ui.material.lightColorPalette
 
 
 // TODO update color theme
@@ -41,11 +44,11 @@ val darkThemeColors = darkColorPalette(
 
 @Composable
 val ColorPalette.searchBar: Color
-    get() = if(isLight) Color.White else Color.DarkGray
+    get() = if (isLight) Color.White else Color.DarkGray
 
 @Composable
 val ColorPalette.textFieldBackground: Color
-    get() = if(isLight) Color.White else Color(0xff424242)
+    get() = if (isLight) Color.White else Color(0xff424242)
 
 @Composable
 fun DistillTheme(
@@ -53,7 +56,7 @@ fun DistillTheme(
     content: @Composable() () -> Unit
 ) {
     MaterialTheme(
-        colors = if(darkTheme) darkThemeColors else lightThemeColors,
+        colors = if (darkTheme) darkThemeColors else lightThemeColors,
         typography = ThemeTypography,
         shapes = Shapes,
         content = content

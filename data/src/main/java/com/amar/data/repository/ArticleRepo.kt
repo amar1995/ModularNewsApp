@@ -53,7 +53,7 @@ class ArticleRepo(
     fun loadData(pageNo: Int, category: String): LiveData<Resource<List<NewsArticle>>> {
         return object : NetworkManager<List<NewsArticle>, NewsArticleResponse?>() {
             override fun shouldFetch(data: List<NewsArticle>?): Boolean {
-                return (data == null || data.isEmpty() || data.size < PAGE_SIZE * (pageNo + 1))
+                return (data == null || data.isEmpty() || data.size < PAGE_SIZE * (pageNo))
             }
 
             override fun loadFromDb(): LiveData<List<NewsArticle>> =
@@ -70,7 +70,7 @@ class ArticleRepo(
             override fun createCall(): LiveData<ApiResponse<NewsArticleResponse?>> {
                 val options: HashMap<String, String> = HashMap()
                 options.put(pageSize, PAGE_SIZE.toString())
-                options.put(page, pageNo.toString())
+                options.put(page, (pageNo).toString())
                 options.put(CATEGORY, category)
                 return articleService.getArticle(options)
             }
@@ -82,15 +82,16 @@ class ArticleRepo(
         }.asLiveData()
     }
 
-    fun searchData(pageNo: Int, query: String): LiveData<Resource<List<NewsArticle>>> {
-        return object : NetworkManager<List<NewsArticle>, NewsArticleResponse?>() {
+    fun searchData(pageNo: Int, query: String): LiveData<Resource<NewsArticleResponse?>> {
+        return object : NetworkManager<NewsArticleResponse?, NewsArticleResponse?>() {
             // always fetch it
-            override fun shouldFetch(data: List<NewsArticle>?): Boolean = true
+            override fun shouldFetch(data: NewsArticleResponse?): Boolean = true
 
-            override fun loadFromDb(): LiveData<List<NewsArticle>> =
+            override fun loadFromDb(): LiveData<NewsArticleResponse?> =
                 AbsentLiveData.create()
 
             override suspend fun saveCallResult(item: NewsArticleResponse?) {
+                println("network item ${item!!.totalResults} >>>>")
                 // do nothing
                 // no need to save searched data
             }
@@ -99,8 +100,9 @@ class ArticleRepo(
                 val options: HashMap<String, String> = HashMap()
                 options.put(pageSize, PAGE_SIZE.toString())
                 options.put(page, pageNo.toString())
-                options.put(QUERY, query)
-                return articleService.getArticle(options)
+                options.put("q", query)
+                options.put(language, language_type)
+                return articleService.getEverything(options)
             }
 
             override fun isInternetAvailable(): Boolean = InternetConnection.isAvailable(context)

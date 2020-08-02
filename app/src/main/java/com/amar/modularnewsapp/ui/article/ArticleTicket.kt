@@ -2,10 +2,7 @@ package com.amar.modularnewsapp.ui.article
 
 import androidx.compose.Composable
 import androidx.ui.core.Modifier
-import androidx.ui.core.clip
-import androidx.ui.foundation.Box
 import androidx.ui.foundation.Text
-import androidx.ui.foundation.drawBackground
 import androidx.ui.foundation.isSystemInDarkTheme
 import androidx.ui.graphics.Color
 import androidx.ui.layout.*
@@ -25,7 +22,7 @@ fun ArticleTicket(
 ) {
     val typography = MaterialTheme.typography
     Surface(
-        color = if(isSystemInDarkTheme()) Color(0xff212121) else Color.White,
+        color = if (isSystemInDarkTheme()) Color(0xff212121) else Color.White,
         modifier = modifier.padding(16.dp),
         shape = MaterialTheme.shapes.large
     ) {
@@ -33,7 +30,7 @@ fun ArticleTicket(
             article.urlToImage?.let { imageUrl ->
                 Surface(
                     modifier = Modifier.fillMaxWidth()
-                     + Modifier.preferredHeight(124.dp),
+                            + Modifier.preferredHeight(124.dp),
                     shape = MaterialTheme.shapes.medium
                 ) {
                     UrlImage(url = imageUrl, height = 100.dp, width = 100.dp)

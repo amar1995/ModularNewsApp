@@ -35,7 +35,6 @@ fun ShowArticleView(
     val scrollState = rememberScrollState()
     Observe {
         val isScrolledToEnd: Boolean = scrollState.value > scrollState.maxValue - 10
-//        println("scrolled value >>>> ${scrollState.maxValue} ${scrollState.value}")
         onCommit(isScrolledToEnd) {
             if (isScrolledToEnd) {
                 scrollState.scrollTo(scrollState.value)
@@ -102,6 +101,7 @@ private fun showText(value: String) {
         )
     )
 }
+
 @Composable
 private fun ShowArticle(
     article: NewsArticle,
