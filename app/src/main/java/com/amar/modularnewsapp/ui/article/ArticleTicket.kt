@@ -28,12 +28,14 @@ fun ArticleTicket(
     ) {
         Column(modifier = Modifier.fillMaxWidth().plus(Modifier.padding(8.dp))) {
             article.urlToImage?.let { imageUrl ->
-                Surface(
-                    modifier = Modifier.fillMaxWidth()
-                            + Modifier.preferredHeight(124.dp),
-                    shape = MaterialTheme.shapes.medium
-                ) {
-                    UrlImage(url = imageUrl, height = 100.dp, width = 100.dp)
+                if(!imageUrl.isNullOrBlank()) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth()
+                                + Modifier.preferredHeight(124.dp),
+                        shape = MaterialTheme.shapes.medium
+                    ) {
+                        UrlImage(url = imageUrl, height = 100.dp, width = 100.dp)
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))

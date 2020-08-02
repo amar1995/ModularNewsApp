@@ -13,15 +13,19 @@ import androidx.ui.core.ContextAmbient
 import androidx.ui.core.Modifier
 import androidx.ui.core.setContent
 import androidx.ui.foundation.Icon
+import androidx.ui.foundation.ScrollableColumn
 import androidx.ui.foundation.Text
 import androidx.ui.foundation.clickable
+import androidx.ui.foundation.shape.corner.CircleShape
 import androidx.ui.graphics.Color
 import androidx.ui.layout.*
 import androidx.ui.livedata.observeAsState
 import androidx.ui.material.*
 import androidx.ui.material.icons.Icons
 import androidx.ui.material.icons.filled.Close
+import androidx.ui.material.icons.filled.FilterList
 import androidx.ui.material.icons.filled.Menu
+import androidx.ui.material.icons.filled.Refresh
 import androidx.ui.text.AnnotatedString
 import androidx.ui.text.SpanStyle
 import androidx.ui.text.style.TextDecoration
@@ -31,6 +35,7 @@ import com.amar.modularnewsapp.common.BaseViewModelFactory
 import com.amar.modularnewsapp.ui.article.ShowArticleView
 import com.amar.modularnewsapp.ui.common.AppBarType
 import com.amar.modularnewsapp.ui.common.ShowLoading
+import com.amar.modularnewsapp.ui.common.SwipeToRefreshLayout
 import com.amar.modularnewsapp.ui.common.UrlImage
 import com.amar.modularnewsapp.ui.navigationBar.NavigationDrawer
 import com.amar.modularnewsapp.ui.search.SearchScreen
@@ -41,12 +46,17 @@ import com.amar.modularnewsapp.ui.util.fadeInTransition
 import com.amar.modularnewsapp.ui.util.fadeOutTransition
 import com.amar.modularnewsapp.viewmodel.ArticleModel
 import com.amar.modularnewsapp.viewmodel.ArticleState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import okhttp3.Dispatcher
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.coroutines.CoroutineContext
 
 private lateinit var articleModel: ArticleModel
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), CoroutineScope {
     private lateinit var navigationStack: NavigationStack<MainScreen>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,10 +66,9 @@ class MainActivity : AppCompatActivity() {
                 this,
                 BaseViewModelFactory { ArticleModel(application = this.application) })
                 .get(ArticleModel::class.java)
-
+        navigationStack = NavigationStack(init = MainScreen.General)
         println("Activty A onCreate")
         setContent {
-            navigationStack = remember { NavigationStack(MainScreen.General) }
 
             DistillTheme {
                 NewsApp(navigationStack)
@@ -102,6 +111,9 @@ class MainActivity : AppCompatActivity() {
             super.onBackPressed()
         }
     }
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + Job()
 }
 
 @Composable
@@ -122,7 +134,6 @@ fun NewsApp(navigationStack: NavigationStack<MainScreen>) {
             }
         }
     }
-
 }
 
 
@@ -155,6 +166,33 @@ fun AppContent(
                             }),
                         style = MaterialTheme.typography.body1
                     )
+                    IconButton(onClick = {
+                        when (navigationStack.current()) {
+                            is MainScreen.General -> {
+                                articleModel.refresh(Screen.GENERAL)
+                            }
+                            is MainScreen.Business -> {
+                                articleModel.refresh(Screen.BUSINESS)
+                            }
+                            is MainScreen.Technology -> {
+                                articleModel.refresh(Screen.TECHNOLOGY)
+                            }
+                            is MainScreen.Science -> {
+                                articleModel.refresh(Screen.SCIENCE)
+                            }
+                            is MainScreen.Health -> {
+                                articleModel.refresh(Screen.HEALTH)
+                            }
+                            is MainScreen.Sports -> {
+                                articleModel.refresh(Screen.SPORTS)
+                            }
+                            is MainScreen.Entertainment -> {
+                                articleModel.refresh(Screen.ENTERTAINMENT)
+                            }
+                        }
+                    }) {
+                        Icon(Icons.Filled.Refresh)
+                    }
                 }
             )
         },
@@ -213,38 +251,75 @@ fun CustomTab(
                     ShowLoading()
                 }
                 is ArticleState.Success -> {
-                    ShowArticleView(
-                        navigationStack = navigationStack,
-                        articles = articleState!!,
-                        endOfPage = {
-                            when (navigationStack.current()) {
-                                MainScreen.Business -> {
-                                    articleModel.endOfPage(Screen.BUSINESS)
-                                }
-                                MainScreen.General -> {
-                                    articleModel.endOfPage(Screen.GENERAL)
-                                }
-                                MainScreen.Technology -> {
-                                    articleModel.endOfPage(Screen.TECHNOLOGY)
-                                }
-                                MainScreen.Entertainment -> {
-                                    articleModel.endOfPage(Screen.ENTERTAINMENT)
-                                }
-                                MainScreen.Sports -> {
-                                    articleModel.endOfPage(Screen.SPORTS)
-                                }
-                                MainScreen.Science -> {
-                                    articleModel.endOfPage(Screen.SCIENCE)
-                                }
-                                MainScreen.Health -> {
-                                    articleModel.endOfPage(Screen.HEALTH)
+//                    SwipeToRefreshLayout(
+//                        refreshingState = false,
+//                        onRefresh = {
+//                            // TODO implement refresh
+//                            when (navigationStack.current()) {
+//                                is MainScreen.General -> {
+//                                    articleModel.refresh(Screen.GENERAL)
+//                                }
+//                                is MainScreen.Business -> {
+//                                    articleModel.refresh(Screen.BUSINESS)
+//                                }
+//                                is MainScreen.Technology -> {
+//                                    articleModel.refresh(Screen.TECHNOLOGY)
+//                                }
+//                                is MainScreen.Science -> {
+//                                    articleModel.refresh(Screen.SCIENCE)
+//                                }
+//                                is MainScreen.Health -> {
+//                                    articleModel.refresh(Screen.HEALTH)
+//                                }
+//                                is MainScreen.Sports -> {
+//                                    articleModel.refresh(Screen.SPORTS)
+//                                }
+//                                is MainScreen.Entertainment -> {
+//                                    articleModel.refresh(Screen.ENTERTAINMENT)
+//                                }
+//                            }
+//                        },
+//                        refreshIndicator = {
+//                            Surface(elevation = 10.dp, shape = CircleShape) {
+//                                CircularProgressIndicator(
+//                                    modifier = Modifier.preferredSize(48.dp).padding(
+//                                        4.dp
+//                                    ),
+//                                    color = MaterialTheme.colors.onSurface
+//                                )
+//                            }
+//                        }
+//                    ) {
+                        ShowArticleView(
+                            navigationStack = navigationStack,
+                            articles = articleState!!,
+                            endOfPage = {
+                                when (navigationStack.current()) {
+                                    MainScreen.Business -> {
+                                        articleModel.endOfPage(Screen.BUSINESS)
+                                    }
+                                    MainScreen.General -> {
+                                        articleModel.endOfPage(Screen.GENERAL)
+                                    }
+                                    MainScreen.Technology -> {
+                                        articleModel.endOfPage(Screen.TECHNOLOGY)
+                                    }
+                                    MainScreen.Entertainment -> {
+                                        articleModel.endOfPage(Screen.ENTERTAINMENT)
+                                    }
+                                    MainScreen.Sports -> {
+                                        articleModel.endOfPage(Screen.SPORTS)
+                                    }
+                                    MainScreen.Science -> {
+                                        articleModel.endOfPage(Screen.SCIENCE)
+                                    }
+                                    MainScreen.Health -> {
+                                        articleModel.endOfPage(Screen.HEALTH)
+                                    }
                                 }
                             }
-                        },
-                        onRefresh = {
-                            articleModel.refresh(it)
-                        }
-                    )
+                        )
+//                    }
                 }
                 is ArticleState.Error -> {
                     // error view
@@ -265,7 +340,7 @@ private fun showNewArticleInDetail(
         color = MaterialTheme.colors.surface
     ) {
         if (article != null) {
-            Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
+            ScrollableColumn(modifier = Modifier.fillMaxSize().padding(8.dp)) {
                 IconButton(onClick = {
                     navigationStack.back()
                 }, modifier = Modifier) {
@@ -273,12 +348,14 @@ private fun showNewArticleInDetail(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 article.urlToImage?.let { imageUrl ->
-                    Surface(
-                        modifier = Modifier.fillMaxWidth()
-                                + Modifier.preferredHeight(164.dp),
-                        shape = MaterialTheme.shapes.medium
-                    ) {
-                        UrlImage(url = imageUrl, width = 100.dp, height = 100.dp)
+                    if(!imageUrl.isNullOrBlank()) {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth()
+                                    + Modifier.preferredHeight(164.dp),
+                            shape = MaterialTheme.shapes.medium
+                        ) {
+                            UrlImage(url = imageUrl, width = 100.dp, height = 100.dp)
+                        }
                     }
                 }
 
@@ -348,7 +425,6 @@ private fun showNewArticleInDetail(
             Column(modifier = Modifier.fillMaxSize()) {
                 Text("Unknow Error !!!!")
             }
-//            onClick()
         }
     }
 }

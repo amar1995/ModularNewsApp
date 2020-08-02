@@ -13,7 +13,9 @@ import com.amar.data.entities.NewsArticleResponse
 import com.amar.data.repository.ArticleRepo
 import com.amar.data.vo.Resource
 import com.amar.data.vo.Status
+import com.amar.modularnewsapp.ui.MainScreen
 import com.amar.modularnewsapp.ui.Screen
+import com.amar.modularnewsapp.ui.util.NavigationStack
 import kotlinx.coroutines.*
 
 class ArticleCache {
@@ -115,6 +117,7 @@ class ArticleModel(application: Application) : AndroidViewModel(application) {
     private var _articles: MutableLiveData<NewsType> = MutableLiveData()
     private var _searches: MutableLiveData<SearchNews> = MutableLiveData()
     val search: LiveData<SearchNews> = _searches
+    val navigationStack: NavigationStack<MainScreen> = NavigationStack(init = MainScreen.General)
 
     init {
         _articles.postValue(NewsType)
@@ -304,7 +307,6 @@ class ArticleModel(application: Application) : AndroidViewModel(application) {
     val articles = _articles.switchMap {
         when (it.category) {
             Category.general -> {
-                println("is general here >>>>")
                 if(it.generalArticleCache.isRefreshing()) {
                     viewModelScope.launch {
                         articleRepo.deleteArticlesByCategory(Category.general.name)

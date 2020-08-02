@@ -1,6 +1,7 @@
 package com.amar.modularnewsapp.ui.article
 
 import androidx.compose.Composable
+import androidx.compose.invalidate
 import androidx.compose.key
 import androidx.compose.onCommit
 import androidx.ui.core.Modifier
@@ -44,88 +45,48 @@ fun ShowArticleView(
             }
         }
     }
-    SwipeToRefreshLayout(
-        refreshingState = false,
-        onRefresh = {
-            // TODO implement refresh
+    ScrollableColumn(scrollState = scrollState, modifier = modifier) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             when (navigationStack.current()) {
                 is MainScreen.General -> {
-                    onRefresh(Screen.GENERAL)
+                    showText(value = Screen.GENERAL.name)
                 }
                 is MainScreen.Business -> {
-                    onRefresh(Screen.BUSINESS)
+                    showText(value = Screen.BUSINESS.name)
                 }
                 is MainScreen.Technology -> {
-                    onRefresh(Screen.TECHNOLOGY)
+                    showText(value = Screen.TECHNOLOGY.name)
                 }
                 is MainScreen.Science -> {
-                    onRefresh(Screen.SCIENCE)
+                    showText(value = Screen.SCIENCE.name)
                 }
                 is MainScreen.Health -> {
-                    onRefresh(Screen.HEALTH)
+                    showText(value = Screen.HEALTH.name)
                 }
                 is MainScreen.Sports -> {
-                    onRefresh(Screen.SPORTS)
+                    showText(value = Screen.SPORTS.name)
                 }
                 is MainScreen.Entertainment -> {
-                    onRefresh(Screen.ENTERTAINMENT)
+                    showText(value = Screen.ENTERTAINMENT.name)
                 }
             }
-        },
-        refreshIndicator = {
-            Surface(elevation = 10.dp, shape = CircleShape) {
-                CircularProgressIndicator(
-                    modifier = Modifier.preferredSize(48.dp).padding(
-                        4.dp
-                    ),
-                    color = MaterialTheme.colors.onSurface
+            articleList.articles.forEach {
+                key(it.key) {
+                    ShowArticle(article = it.value, onClick = {
+                        navigationStack.next(
+                            next = MainScreen.Detail_view(it.value),
+                            enterTransition = slideRollLeftTransition,
+                            exitTransition = slideRollRightTransition
+                        )
+                    })
+                }
+            }
+            when {
+                articles.isLoadingMorePage -> LoadingMoreArticleView()
+                !articles.hasLoadedAllPages -> LoadMoreArticleButton(
+                    onPageEndReached = endOfPage
                 )
-            }
-        }
-    ) {
-        ScrollableColumn(scrollState = scrollState, modifier = modifier) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                when (navigationStack.current()) {
-                    is MainScreen.General -> {
-                        showText(value = Screen.GENERAL.name)
-                    }
-                    is MainScreen.Business -> {
-                        showText(value = Screen.BUSINESS.name)
-                    }
-                    is MainScreen.Technology -> {
-                        showText(value = Screen.TECHNOLOGY.name)
-                    }
-                    is MainScreen.Science -> {
-                        showText(value = Screen.SCIENCE.name)
-                    }
-                    is MainScreen.Health -> {
-                        showText(value = Screen.HEALTH.name)
-                    }
-                    is MainScreen.Sports -> {
-                        showText(value = Screen.SPORTS.name)
-                    }
-                    is MainScreen.Entertainment -> {
-                        showText(value = Screen.ENTERTAINMENT.name)
-                    }
-                }
-                articleList.articles.forEach {
-                    key(it.key) {
-                        ShowArticle(article = it.value, onClick = {
-                            navigationStack.next(
-                                next = MainScreen.Detail_view(it.value),
-                                enterTransition = slideRollLeftTransition,
-                                exitTransition = slideRollRightTransition
-                            )
-                        })
-                    }
-                }
-                when {
-                    articles.isLoadingMorePage -> LoadingMoreArticleView()
-                    !articles.hasLoadedAllPages -> LoadMoreArticleButton(
-                        onPageEndReached = endOfPage
-                    )
-                    articles.hasLoadedAllPages -> NoMoreArticleView()
-                }
+                articles.hasLoadedAllPages -> NoMoreArticleView()
             }
         }
     }
@@ -149,10 +110,12 @@ private fun ShowArticle(
     article: NewsArticle,
     onClick: () -> Unit
 ) {
-    ArticleTicket(
-        article = article,
-        modifier = Modifier.clickable(onClick = onClick)
-    )
+    Row(modifier = Modifier.clickable(onClick = onClick)) {
+        ArticleTicket(
+            article = article,
+            modifier = Modifier
+        )
+    }
 }
 
 

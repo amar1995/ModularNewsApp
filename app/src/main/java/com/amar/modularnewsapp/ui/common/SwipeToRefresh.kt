@@ -1,25 +1,13 @@
 package com.amar.modularnewsapp.ui.common
 
-import androidx.animation.AnimatedFloat
-import androidx.animation.AnimationClockObservable
-import androidx.animation.AnimationEndReason
-import androidx.animation.AnimationSpec
-import androidx.animation.ExponentialDecay
-import androidx.animation.OnAnimationEnd
-import androidx.animation.Spring
-import androidx.animation.TargetAnimation
-import androidx.animation.TweenSpec
+import androidx.animation.*
 import androidx.annotation.FloatRange
 import androidx.compose.Composable
 import androidx.compose.onCommit
 import androidx.compose.remember
 import androidx.compose.state
 import androidx.ui.animation.asDisposableClock
-import androidx.ui.core.Alignment
-import androidx.ui.core.AnimationClockAmbient
-import androidx.ui.core.DensityAmbient
-import androidx.ui.core.Modifier
-import androidx.ui.core.composed
+import androidx.ui.core.*
 import androidx.ui.core.gesture.scrollorientationlocking.Orientation
 import androidx.ui.foundation.Box
 import androidx.ui.foundation.InteractionState
